@@ -156,10 +156,14 @@ section{padding:100px 0}
 .why-cta{text-align:center;margin-top:36px}
 /* Hire Me CTA */
 .hire-section{background:linear-gradient(135deg,rgba(6,182,212,.08),rgba(139,92,246,.08));padding:80px 0;text-align:center;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.hire-layout{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.hire-badge-img{width:200px;height:auto;border-radius:16px;box-shadow:0 0 40px rgba(6,182,212,0.2)}
+.hire-text{text-align:left;max-width:560px}
 .hire-section h2{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:900;margin-bottom:14px}
-.hire-section .hire-subtitle{color:var(--text2);font-size:1rem;margin-bottom:8px;max-width:600px;margin-left:auto;margin-right:auto}
+.hire-section .hire-subtitle{color:var(--text2);font-size:1rem;margin:14px 0;text-align:left}
+@media(max-width:768px){.hire-layout{flex-direction:column;text-align:left}.hire-badge-img{width:160px}.hire-text{text-align:left;max-width:100%}}
 .hire-details{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin:24px 0 32px;font-size:.85rem;color:var(--text2);padding-left:0}
-.hire-details span{display:flex;align-items:flex-start;gap:6px;text-align:left;padding-left:0;width:100%}
+.hire-details span{display:flex;align-items:flex-start;gap:6px;text-align:left;padding-left:0}
 .hire-details .dot{color:var(--accent);flex-shrink:0;margin-top:2px}
 .hire-buttons{display:flex;justify-content:flex-start;gap:14px;flex-wrap:wrap}
 @media(max-width:768px){.hire-buttons{flex-direction:column;width:100%}.hire-buttons .btn{width:100%;justify-content:center}}
@@ -220,10 +224,7 @@ section{padding:100px 0}
 .tl-header{flex-direction:column}
 .projects-grid{grid-template-columns:1fr}
 .contact-grid{grid-template-columns:1fr}
-.hire-details{align-items:flex-start;padding-left:0;margin-left:0}
-.hire-details span{padding-left:0;margin-left:0}
-.hire-buttons{flex-direction:column;width:100%}
-.hire-buttons .btn{width:100%;justify-content:center}
+.hire-details{flex-direction:column;align-items:center;gap:12px}
 section{padding:70px 0}.numbers-section,.why-hire,.hire-section{padding:60px 0}
 }
 @media(max-width:480px){
@@ -467,11 +468,11 @@ section{padding:70px 0}.numbers-section,.why-hire,.hire-section{padding:60px 0}
 <!-- HIRE ME CTA -->
 <section id="hire-me" class="hire-section">
 <div class="container reveal">
-<div style="display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap">
-<img src="badge.png" alt="Sudish Kumar Badge" style="width:200px;height:auto;border-radius:16px;box-shadow:0 0 40px rgba(6,182,212,0.2)">
-<div style="text-align:left;max-width:560px">
+<div class="hire-layout">
+<img src="badge.png" alt="Sudish Kumar Badge" class="hire-badge-img">
+<div class="hire-text">
 <h2>🔥 Want Me on Your Team?</h2>
-<p class="hire-subtitle" style="text-align:left;margin:14px 0">I'm actively looking for my next ML/AI engineering challenge. If your team builds intelligent systems, ships models to production, or needs someone who combines technical depth with clear communication — let's talk.</p>
+<p class="hire-subtitle">I'm actively looking for my next ML/AI engineering challenge. If your team builds intelligent systems, ships models to production, or needs someone who combines technical depth with clear communication — let's talk.</p>
 <div class="hire-details">
 <span><span class="dot">▸</span> Roles: ML Engineer, GenAI Engineer, Data Scientist, NLP Engineer, MLOps, AI Solutions Architect</span>
 <span><span class="dot">▸</span> Location: Anywhere (preferred: Bengaluru / Hyderabad / Pune / Gurgaon)</span>
@@ -486,7 +487,6 @@ section{padding:70px 0}.numbers-section,.why-hire,.hire-section{padding:60px 0}
 </div>
 </div>
 </div></section>
-<!-- Certifications -->
 <section id="certifications">
 <div class="container">
 <div class="section-header reveal"><p class="section-label">// Credentials</p><h2 class="section-title">Certifications</h2></div>
