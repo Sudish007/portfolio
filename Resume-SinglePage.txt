@@ -1,0 +1,57 @@
+SUDISH KUMAR
+Bengaluru, India | sudishnit@gmail.com | +91 9870176701 | linkedin.com/in/simplysudish | github.com/Sudish007 | sudishk.netlify.app
+
+MACHINE LEARNING ENGINEER | DEEP LEARNING (PYTORCH) | GENERATIVE AI | AWS SAGEMAKER
+
+AWS-certified AI Practitioner & GenAI Developer with 10+ years professional experience, 3+ years in AI/ML at Amazon. Building production agentic AI systems, RAG pipelines, and LLM-powered tools at scale. 99%+ accuracy across 10+ initiatives, tools saving 150+ hours/day for 200-person teams.
+
+SKILLS
+ML/DL: PyTorch, TensorFlow, Scikit-Learn, XGBoost, LightGBM, CNNs, Transfer Learning, Feature Engineering
+GenAI: LangChain, LangGraph, RAG, LLM Fine-tuning (LoRA/QLoRA), Hugging Face, Agentic AI, RLHF, Guardrails, Red-Teaming
+AWS/MLOps: SageMaker, Bedrock, Lambda, Docker, Kubernetes, MLflow, CI/CD, Model Monitoring, TorchServe
+Python: NumPy, Pandas, FastAPI, Pytest, OOP, Async, Streamlit, Plotly | SQL: PostgreSQL, Window Functions, CTEs, Airflow, Spark
+Tools: Git, Linux, Docker, Kubernetes, REST APIs, Tableau, Power BI, Weights & Biases
+
+WORK EXPERIENCE
+
+AMAZON, Hyderabad | AI Benchmarking Specialist | March 2026 – Present
+• Building an agentic AI assistant for sellers — queries Seller Central data (inventory, orders, revenue, shipping) and delivers insights in natural language with visualizations
+• Designed full RAG pipeline: SP-API ingestion → ETL → PostgreSQL + ChromaDB → LangGraph agent with SQL/retrieval tools → Claude/GPT generation
+• Implemented safety layer — query classification, harmful content detection, hallucination reduction (99% accuracy)
+• Leading RLHF evaluation: rating helpfulness, accuracy, correctness across 1000+ query-response pairs
+• Benchmarking AI models: test plans, metrics, acceptance criteria across accuracy, robustness, bias, reliability
+
+AMAZON WEB SERVICES (AWS), Bengaluru | ML Data Associate II | Oct 2024 – Mar 2026
+• Built automated data pipelines (Python, SQL) for large-scale datasets across text, code, and CV — 99%+ accuracy
+• Engineered training datasets for Agentic AI across Finance, Health, Legal — 10+ initiatives incl. Red-Teaming
+• Developed "SageMaker Smart Stats" — JS productivity tool saving ~45 min/day per associate, 200-person team (15-20% boost)
+• Authored technical SOPs reducing guideline errors 15%; built Tableau/Python dashboards for annotation drift monitoring
+
+AMAZON, Delhi (Remote) | AI Associate | Sep 2023 – Mar 2024
+• Built Python automation for data validation — improved model accuracy 94% → 99%, reduced rework 30%
+• Developed dashboards (Pandas, Matplotlib, Excel VBA) tracking throughput, error rates, SLA in real-time
+• 99.5% dataset accuracy, zero SLA misses — identified labeling errors via statistical analysis
+
+STUDYCZAR, Delhi | Educator | Sep 2016 – Aug 2023
+• Taught Physics, Mathematics, Python, SQL to 500+ students — average scores above 91%
+
+PROJECTS
+• GenAI Multimodal Chatbot — AWS Bedrock (Claude), streaming, guardrails, 500+ concurrent users
+• RAG Document QA — LangChain, FAISS, Bedrock embeddings, cited sources, enterprise-grade
+• ML Pipeline (SageMaker) — Fraud detection, feature store, hyperparameter tuning, 96.3% precision
+• LLM Fine-tuning (LoRA) — Llama-2 for financial QA, 4-bit quantization, 23% accuracy improvement
+• Sentiment Analysis API — DistilBERT, FastAPI, Docker, Lambda, sub-100ms, 1000+ req/min
+• Stock Anomaly Detector — Python, Z-score, rolling window, Plotly visualization, OOP
+• SQL Analytics Engine — Cohort retention, RFM segmentation, window functions, query optimization
+
+CERTIFICATIONS
+• AWS Certified AI Practitioner (Dec 2025) • AWS Generative AI Developer (2026)
+• Google Data Analytics Professional (Apr 2025) • Python for Data Science & AI — IBM (2024)
+• SQL for Data Science — UC Davis/Coursera (2024) • Project Management: Agile/Scrum (Jan 2024)
+
+EDUCATION
+B.Tech in Electrical and Electronics Engineering — National Institute of Technology Sikkim
+
+AWARDS
+• Prime Player Award (Feb & Apr 2025) — Highest productivity/reliability metrics across entire team, twice in 3 months
+• Leadership Recognition — Multiple shout-outs for Agentic AI SOPs and multilingual dataset creation

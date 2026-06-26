@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudish Kumar — Resume</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:#1a1a2e;line-height:1.5;max-width:850px;margin:0 auto;padding:40px 50px;font-size:10.5pt}
+@media print{body{padding:20px 40px;font-size:10pt}a{color:#1a1a2e!important}}
+a{color:#0891b2;text-decoration:none}
+h1{font-size:22pt;font-weight:800;letter-spacing:-0.5px;margin-bottom:4px}
+.header{text-align:center;margin-bottom:16px;border-bottom:2px solid #0891b2;padding-bottom:14px}
+.contact{font-size:9pt;color:#4a4a5a;margin-top:6px}
+.contact a{color:#4a4a5a}
+.tagline{font-size:10pt;font-weight:600;color:#0891b2;margin-top:6px;letter-spacing:0.5px}
+.summary{font-size:9.5pt;color:#4a4a5a;margin-top:8px;line-height:1.6}
+h2{font-size:11pt;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#0891b2;margin:18px 0 10px;border-bottom:1px solid #e2e4ea;padding-bottom:4px}
+.job{margin-bottom:14px}
+.job-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.job-company{font-weight:700;font-size:10.5pt}
+.job-date{font-size:9pt;color:#6b6b7b;font-weight:500}
+.job-role{font-size:9.5pt;color:#0891b2;font-weight:600;margin-bottom:4px}
+ul{padding-left:16px;margin-top:4px}
+li{margin-bottom:4px;font-size:9.5pt;color:#2a2a3a;line-height:1.5}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+.skill-row{font-size:9.5pt}
+.skill-row strong{font-weight:600;color:#1a1a2e}
+.projects-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.project{font-size:9.5pt}
+.project strong{font-weight:600}
+.project span{color:#6b6b7b;font-size:8.5pt}
+.certs{font-size:9.5pt}
+.certs li{margin-bottom:3px}
+.print-btn{position:fixed;bottom:20px;right:20px;background:#0891b2;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;font-size:12px}
+@media print{.print-btn{display:none}}
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">📄 Save as PDF</button>
+
+<div class="header">
+<h1>SUDISH KUMAR</h1>
+<div class="contact">
+Bengaluru, India &nbsp;|&nbsp; <a href="mailto:sudishnit@gmail.com">sudishnit@gmail.com</a> &nbsp;|&nbsp; +91 9870176701 &nbsp;|&nbsp; <a href="https://linkedin.com/in/simplysudish">linkedin.com/in/simplysudish</a> &nbsp;|&nbsp; <a href="https://github.com/Sudish007">github.com/Sudish007</a> &nbsp;|&nbsp; <a href="https://sudishk.netlify.app">sudishk.netlify.app</a>
+</div>
+<div class="tagline">MACHINE LEARNING ENGINEER | DEEP LEARNING (PYTORCH) | GENERATIVE AI | AWS SAGEMAKER</div>
+<div class="summary">AWS-certified AI Practitioner & Generative AI Developer with 10+ years professional experience, including 3+ years in AI/ML at Amazon. Building production agentic AI systems, RAG pipelines, and LLM-powered tools at scale. Proven track record: 99%+ data accuracy across 10+ AI initiatives, tools saving 150+ hours/day for a 200-person team, and multiple leadership awards.</div>
+</div>
+<h2>Skills</h2>
+<div class="skills-grid">
+<div class="skill-row"><strong>ML/DL:</strong> PyTorch, TensorFlow, Scikit-Learn, XGBoost, LightGBM, CNNs, Transfer Learning, Feature Engineering, Hyperparameter Tuning</div>
+<div class="skill-row"><strong>GenAI & NLP:</strong> LangChain, LangGraph, RAG Pipelines, LLM Fine-tuning (LoRA/QLoRA), Hugging Face, Prompt Engineering, Agentic AI, RLHF, Guardrails, Red-Teaming</div>
+<div class="skill-row"><strong>AWS & MLOps:</strong> SageMaker, Bedrock, Lambda, EC2/S3, Docker, Kubernetes, MLflow, CI/CD, Model Monitoring, TorchServe/Triton, A/B Testing</div>
+<div class="skill-row"><strong>Python:</strong> NumPy, Pandas, FastAPI, Pytest, OOP, Async, Streamlit, Plotly, Data Pipelines</div>
+<div class="skill-row"><strong>SQL & Data Eng:</strong> PostgreSQL, Window Functions, CTEs, Query Optimization, Apache Airflow, Spark, dbt, Kafka, ETL Pipelines</div>
+<div class="skill-row"><strong>Analytics:</strong> Tableau, Power BI, Probability & Statistics, Weights & Biases, Jupyter</div>
+<div class="skill-row"><strong>Tools:</strong> Git/GitHub, Linux, Docker, Kubernetes, REST APIs, Microservices, CI/CD, Agile/Scrum</div>
+<div class="skill-row"><strong>Vector DBs:</strong> FAISS, ChromaDB, Pinecone | <strong>Web:</strong> HTML/CSS/JS, TypeScript, Node.js</div>
+</div>
+
+<h2>Work Experience</h2>
+
+<div class="job">
+<div class="job-header"><span class="job-company">AMAZON, Hyderabad</span><span class="job-date">March 2026 — Present</span></div>
+<div class="job-role">AI Benchmarking Specialist</div>
+<ul>
+<li>Building and deploying an agentic AI assistant for Amazon sellers — a conversational system that queries Seller Central data (inventory, orders, revenue, shipping) and delivers business insights in natural language with inline visualizations</li>
+<li>Designed the full RAG pipeline: SP-API data ingestion → ETL → PostgreSQL (structured) + ChromaDB (vector embeddings) → LangGraph agent with SQL and retrieval tools → Claude/GPT response generation</li>
+<li>Implemented safety and guardrails layer — query classification, harmful content detection, policy-bypass prevention, and hallucination reduction achieving 99% response accuracy</li>
+<li>Leading RLHF evaluation workflows: rating helpfulness, factual accuracy, and data correctness across 1000+ query-response pairs to continuously improve model quality</li>
+<li>Benchmarking AI models end-to-end — defining test plans, evaluation metrics, and acceptance criteria across accuracy, robustness, bias, and reliability</li>
+</ul>
+</div>
+
+<div class="job">
+<div class="job-header"><span class="job-company">AMAZON WEB SERVICES (AWS), Bengaluru</span><span class="job-date">October 2024 — March 2026</span></div>
+<div class="job-role">Machine Learning Data Associate II</div>
+<ul>
+<li>Built automated data pipelines using Python (Pandas, NumPy) and SQL to prepare, validate, and annotate large-scale datasets across text, code (QAL), and computer vision — maintaining 99%+ accuracy across all deliverables</li>
+<li>Engineered high-precision training datasets for Agentic AI models across Finance, Mortgage, Health, and Legal domains — 10+ initiatives including Red-Teaming, mathematical evaluation, and multi-turn conversation flows</li>
+<li>Developed "SageMaker Smart Stats" from scratch — a JavaScript-based productivity analytics tool that automated metric tracking, surfaced workflow bottlenecks, and saved ~45 min/day per associate across a 200-person team (15-20% output increase)</li>
+<li>Authored technical SOPs and annotation guidelines for complex ML tasks — reduced errors by 15% and became the go-to documentation resource for the team</li>
+<li>Built custom Tableau and Python dashboards for data quality monitoring — flagging annotation drift, inter-annotator agreement scores, and SLA adherence in real-time</li>
+</ul>
+</div>
+
+<div class="job">
+<div class="job-header"><span class="job-company">AMAZON, Delhi (Remote)</span><span class="job-date">September 2023 — March 2024</span></div>
+<div class="job-role">Artificial Intelligence Associate</div>
+<ul>
+<li>Built Python-based automation scripts for data validation and quality scoring — improved AI model training accuracy from 94% to 99% while reducing manual rework by 30%</li>
+<li>Developed performance monitoring dashboards using Python (Pandas, Matplotlib) and Excel VBA — tracking per-associate throughput, error rates, and SLA adherence in real-time</li>
+<li>Maintained 99.5% dataset accuracy with zero SLA misses — identified systematic labeling errors through statistical analysis and implemented corrective feedback loops</li>
+</ul>
+</div>
+
+<div class="job">
+<div class="job-header"><span class="job-company">STUDYCZAR, Delhi</span><span class="job-date">September 2016 — August 2023</span></div>
+<div class="job-role">Educator (Physics, Mathematics, Python, SQL)</div>
+<ul>
+<li>Taught Physics, Mathematics, Python, and SQL to 500+ students over 7 years — average scores above 91%</li>
+<li>Developed curriculum for Python programming and SQL fundamentals — bridging theoretical concepts with practical data analysis applications</li>
+</ul>
+</div>
+
+<h2>Projects</h2>
+<div class="projects-grid">
+<div class="project"><strong>GenAI Multimodal Chatbot</strong> — Full-stack chatbot on AWS Bedrock (Claude), streaming responses, conversation memory, enterprise guardrails. 500+ concurrent users. <span>AWS Bedrock, Python, Streamlit, DynamoDB</span></div>
+<div class="project"><strong>RAG Document QA Pipeline</strong> — Production RAG with semantic chunking, FAISS vector store, Bedrock embeddings, cited source answers. <span>LangChain, AWS Bedrock, FAISS, FastAPI</span></div>
+<div class="project"><strong>End-to-End ML Pipeline (SageMaker)</strong> — Fraud detection: automated feature engineering, hyperparameter tuning, A/B testing, real-time inference. 96.3% precision. <span>SageMaker, XGBoost, Feature Store, Step Functions</span></div>
+<div class="project"><strong>LLM Fine-tuning (LoRA/QLoRA)</strong> — Fine-tuned Llama-2 for financial QA with 4-bit quantization. 23% accuracy improvement over base model. <span>PyTorch, PEFT, Hugging Face, bitsandbytes</span></div>
+<div class="project"><strong>Sentiment Analysis API</strong> — Real-time classification with DistilBERT. Dockerized on Lambda. Sub-100ms latency, 1000+ req/min. <span>Transformers, FastAPI, Docker, Lambda</span></div>
+<div class="project"><strong>Real-Time Stock Anomaly Detector</strong> — Z-score and rolling-window anomaly detection on live market data. OOP, full test coverage, interactive Plotly charts. <span>Python, Pandas, NumPy, Plotly, Statistics</span></div>
+<div class="project"><strong>E-Commerce SQL Analytics Engine</strong> — Cohort retention, RFM segmentation, funnel analysis with window functions, CTEs, and EXPLAIN plan optimization. <span>PostgreSQL, Advanced SQL, Query Optimization</span></div>
+</div>
+
+<h2>Certifications</h2>
+<ul class="certs">
+<li><strong>AWS Certified AI Practitioner</strong> — December 2025</li>
+<li><strong>AWS Generative AI Developer</strong> — 2026</li>
+<li><strong>Google Data Analytics Professional Certificate</strong> — April 2025</li>
+<li><strong>Python for Data Science & AI (IBM)</strong> — 2024</li>
+<li><strong>SQL for Data Science (UC Davis / Coursera)</strong> — 2024</li>
+<li><strong>Project Management: Beginner to PM (Agile/Scrum)</strong> — January 2024</li>
+</ul>
+
+<h2>Education</h2>
+<div class="project"><strong>B.Tech in Electrical and Electronics Engineering</strong> — National Institute of Technology Sikkim, Ravangla</div>
+
+<h2>Awards</h2>
+<ul class="certs">
+<li><strong>Prime Player Award (Feb & Apr 2025)</strong> — Highest productivity and reliability metrics across entire team at AWS. Twice in 3 months.</li>
+<li><strong>Leadership Recognition</strong> — Multiple shout-outs for Agentic AI SOP development, multilingual dataset creation, and consistently exceeding expectations.</li>
+</ul>
+
+</body>
+</html>

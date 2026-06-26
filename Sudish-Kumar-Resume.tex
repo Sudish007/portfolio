@@ -1,0 +1,124 @@
+\documentclass[10.5pt,a4paper]{article}
+\usepackage[margin=0.5in]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{needspace}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\definecolor{accent}{HTML}{0891B2}
+\definecolor{subtext}{HTML}{4A4A5A}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
+\titleformat{\section}{\normalsize\bfseries\color{accent}}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{10pt}{5pt}
+\setlist[itemize]{leftmargin=14pt,itemsep=1pt,parsep=0pt,topsep=2pt}
+\hypersetup{colorlinks=true,linkcolor=accent,urlcolor=accent}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries SUDISH KUMAR}\\[5pt]
+{\small\color{subtext}
+Hyderabad, India \textbar\ \href{mailto:sudishnit@gmail.com}{sudishnit@gmail.com} \textbar\ +91 9870176701 \textbar\ \href{https://linkedin.com/in/simplysudish}{LinkedIn} \textbar\ \href{https://github.com/Sudish007}{GitHub} \textbar\ \href{https://sudishk.netlify.app}{Portfolio}}\\[6pt]
+{\small\bfseries\color{accent} MACHINE LEARNING ENGINEER \textbar\ DEEP LEARNING (PYTORCH) \textbar\ GENERATIVE AI \textbar\ AWS SAGEMAKER}\\[6pt]
+{\small\color{subtext} AWS-certified AI Practitioner \& Generative AI Developer with 10+ years of professional experience, including 3+ years building AI/ML systems at Amazon. Specialized in production agentic AI, RAG pipelines, LLM evaluation, and full-lifecycle MLOps. Maintained 99\%+ data accuracy across 10+ AI initiatives and built internal tools that save 150+ hours daily for a 200-person team. Seeking ML Engineer, GenAI Engineer, or Data Scientist roles.}
+\end{center}
+
+\section*{TECHNICAL SKILLS}
+\textbf{ML/DL:} PyTorch, TensorFlow, Scikit-Learn, XGBoost, CNNs, Transfer Learning, Feature Engineering, Hyperparameter Tuning\\[3pt]
+\textbf{GenAI:} LangChain, LangGraph, RAG Pipelines, LLM Fine-tuning (LoRA/QLoRA), Hugging Face, Agentic AI, RLHF, Guardrails, Vector DBs (FAISS/ChromaDB)\\[3pt]
+\textbf{AWS/MLOps:} SageMaker, Bedrock, Lambda, Docker, Kubernetes, MLflow, CI/CD, Model Monitoring, TorchServe\\[3pt]
+\textbf{Python \& SQL:} NumPy, Pandas, FastAPI, Pytest, Streamlit, Plotly | PostgreSQL, Window Functions, CTEs, Airflow, Spark\\[3pt]
+\textbf{Tools:} Git, Linux, Docker, Kubernetes, Tableau, Power BI, Weights \& Biases, Agile/Scrum
+
+\section*{WORK EXPERIENCE}
+
+{\textbf{AMAZON, Hyderabad} \hfill {\small\color{subtext} March 2026 -- Present}}\\
+{\color{accent}\textbf{AI Benchmarking Specialist}}
+\begin{itemize}
+\item Building and deploying an agentic AI assistant for Amazon sellers --- a conversational system that queries Seller Central data (inventory, orders, revenue, shipping) and delivers business insights in natural language with inline visualizations
+\item Designed the full RAG pipeline: SP-API data ingestion $\rightarrow$ ETL $\rightarrow$ PostgreSQL (structured) + ChromaDB (vector embeddings) $\rightarrow$ LangGraph agent with SQL and retrieval tools $\rightarrow$ Claude/GPT response generation
+\item Implemented safety and guardrails layer --- query classification, harmful content detection, policy-bypass prevention, and hallucination reduction achieving 99\% response accuracy
+\item Leading RLHF evaluation workflows: rating helpfulness, factual accuracy, and data correctness across 1000+ query-response pairs to continuously improve model quality
+\item Benchmarking AI models end-to-end --- defining test plans, evaluation metrics, and acceptance criteria across accuracy, robustness, bias, and reliability
+\end{itemize}
+
+\vspace{4pt}
+{\textbf{AMAZON WEB SERVICES (AWS), Bengaluru} \hfill {\small\color{subtext} October 2024 -- March 2026}}\\
+{\color{accent}\textbf{Machine Learning Data Associate II}}
+\begin{itemize}
+\item Built automated data pipelines using Python (Pandas, NumPy) and SQL to prepare, validate, and annotate large-scale datasets across text, code (QAL), and computer vision (image/video) --- maintaining 99\%+ accuracy across all deliverables
+\item Engineered high-precision training datasets for Agentic AI models across Finance, Mortgage, Health, and Legal domains --- 10+ initiatives including Red-Teaming, mathematical evaluation, and multi-turn conversation flows
+\item Developed ``SageMaker Smart Stats'' from scratch --- a JavaScript-based productivity analytics tool that automated metric tracking, surfaced workflow bottlenecks, and saved \textasciitilde45 minutes per associate daily across a 200-person team (15--20\% output increase)
+\item Authored technical SOPs and annotation guidelines for complex ML tasks --- reduced guideline-related errors by 15\% and significantly cut rework cycles, becoming the go-to documentation resource for the team
+\item Built custom Tableau and Python dashboards for data quality monitoring --- flagging annotation drift, inter-annotator agreement scores, and SLA adherence in real-time
+\end{itemize}
+
+\vspace{4pt}
+{\textbf{AMAZON, Delhi (Remote)} \hfill {\small\color{subtext} September 2023 -- March 2024}}\\
+{\color{accent}\textbf{Artificial Intelligence Associate}}
+\begin{itemize}
+\item Built Python-based automation scripts for data validation and quality scoring --- improved AI model training accuracy from 94\% to 99\% while reducing manual rework by 30\%
+\item Developed performance monitoring dashboards using Python (Pandas, Matplotlib) and Excel VBA --- tracking per-associate throughput, error rates, and SLA adherence in real-time
+\item Maintained 99.5\% dataset accuracy across all deliverables with zero SLA misses --- identified systematic labeling errors through statistical analysis and implemented corrective feedback loops
+\end{itemize}
+
+\vspace{4pt}
+\newpage
+{\textbf{STUDYCZAR, Delhi} \hfill {\small\color{subtext} September 2016 -- August 2023}}\\
+{\color{accent}\textbf{Educator --- Physics, Mathematics, Python, SQL}}
+\begin{itemize}
+\item Taught Physics, Mathematics, Python programming, and SQL fundamentals to 500+ students over 7 years --- average student scores above 91\%
+\item Introduced Python and SQL modules into the curriculum --- covering data types, loops, functions, Pandas basics, and writing queries for real-world datasets
+\item Taught probability, statistics, and linear algebra --- the mathematical foundations that directly map to machine learning and data science
+\item Tracked student performance using spreadsheets and basic Python scripts --- identified weak areas early and adjusted teaching approach accordingly
+\item Managed batches of 80+ students with structured lesson plans, regular assessments, and personalized feedback cycles
+\end{itemize}
+
+\section*{PROJECTS}
+
+\textbf{GenAI Multimodal Chatbot --- AWS Bedrock}\\
+{\small Full-stack generative AI chatbot handling text, images, and documents. Built on Claude via AWS Bedrock with streaming responses, conversation memory, and enterprise guardrails. Serves 500+ concurrent users.}\\
+{\small\color{subtext}\textit{Tech: AWS Bedrock, Claude, Python, Streamlit, DynamoDB}}\\[5pt]
+
+\textbf{RAG Document QA Pipeline --- AWS Bedrock}\\
+{\small Production-grade RAG pipeline with semantic chunking, FAISS vector store, and Bedrock embeddings. Answers queries with proper source citations. Handles enterprise document loads.}\\
+{\small\color{subtext}\textit{Tech: LangChain, AWS Bedrock, FAISS, FastAPI, Python}}\\[5pt]
+
+\textbf{End-to-End ML Pipeline --- SageMaker (Fraud Detection)}\\
+{\small Complete MLOps pipeline: automated feature engineering, hyperparameter tuning, A/B testing, and real-time inference endpoint. Achieved 96.3\% precision on production data.}\\
+{\small\color{subtext}\textit{Tech: SageMaker, XGBoost, Feature Store, Lambda, Step Functions}}\\[5pt]
+
+\textbf{LLM Fine-tuning with PyTorch (LoRA/QLoRA)}\\
+{\small Parameter-efficient fine-tuning of Llama-2 for domain-specific financial QA. 4-bit quantization for consumer GPU deployment. 23\% accuracy improvement over base model.}\\
+{\small\color{subtext}\textit{Tech: PyTorch, LoRA, Hugging Face, PEFT, bitsandbytes}}\\[5pt]
+
+\textbf{Sentiment Analysis API --- Transformers}\\
+{\small Real-time sentiment classification using fine-tuned DistilBERT. Containerized with Docker, deployed on AWS Lambda. Sub-100ms inference latency, handles 1000+ requests/min.}\\
+{\small\color{subtext}\textit{Tech: Transformers, FastAPI, Docker, Lambda, DistilBERT}}\\[5pt]
+
+\textbf{Real-Time Stock Anomaly Detector}\\
+{\small Pulls live market data via API, applies Z-score and rolling-window anomaly detection. Clean OOP structure with type hints and full test coverage. Interactive Plotly visualizations.}\\
+{\small\color{subtext}\textit{Tech: Python, Pandas, NumPy, Plotly, Statistics, OOP}}\\[5pt]
+
+\textbf{E-Commerce SQL Analytics Engine}\\
+{\small Advanced analytics on real e-commerce data: cohort retention, RFM customer segmentation, funnel conversion tracking, revenue forecasting with window functions. EXPLAIN plan optimization.}\\
+{\small\color{subtext}\textit{Tech: PostgreSQL, Window Functions, CTEs, Query Optimization, RFM}}
+
+\section*{CERTIFICATIONS}
+{\small
+\textbf{AWS Certified AI Practitioner} (Dec 2025) \textbar\ \textbf{AWS Generative AI Developer} (2026) \textbar\ \textbf{Google Data Analytics Professional} (Apr 2025)\\
+\textbf{Python for Data Science --- IBM} (2024) \textbar\ \textbf{SQL for Data Science --- UC Davis} (2024) \textbar\ \textbf{Project Management: Agile/Scrum} (Jan 2024)}
+
+\vspace{4pt}
+\section*{EDUCATION \& AWARDS}
+{\small \textbf{B.Tech in Electrical and Electronics Engineering} --- National Institute of Technology Sikkim, Ravangla \hfill {\color{subtext}2012 -- 2016}}\\[4pt]
+{\small \textbf{Prime Player Award (Feb \& Apr 2025)} --- Highest productivity/reliability across entire team at AWS. Twice in 3 months.}\\
+{\small \textbf{Leadership Recognition} --- Shout-outs for Agentic AI SOPs, multilingual datasets, exceeding expectations.}
+
+\end{document}
