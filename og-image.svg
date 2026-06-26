@@ -1,0 +1,24 @@
+<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="630" fill="#0a0a0f"/>
+  <rect x="0" y="0" width="1200" height="4" fill="url(#grad)"/>
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4"/>
+      <stop offset="100%" style="stop-color:#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Name -->
+  <text x="100" y="220" font-family="Inter, sans-serif" font-size="72" font-weight="900" fill="#f0f0f5">SUDISH KUMAR</text>
+  <!-- Subtitle -->
+  <text x="100" y="290" font-family="JetBrains Mono, monospace" font-size="28" fill="#06b6d4">ML Engineer | Deep Learning | Generative AI | AWS</text>
+  <!-- Description -->
+  <text x="100" y="370" font-family="Inter, sans-serif" font-size="22" fill="#a0a0b0">AWS-certified AI Practitioner &amp; GenAI Developer at Amazon</text>
+  <text x="100" y="405" font-family="Inter, sans-serif" font-size="22" fill="#a0a0b0">Building production AI systems with 99%+ accuracy</text>
+  <!-- Stats -->
+  <text x="100" y="490" font-family="JetBrains Mono, monospace" font-size="20" fill="#6b6b7b">2+ Years Amazon/AWS  •  10+ AI Initiatives  •  2 AWS Certifications</text>
+  <!-- CTA -->
+  <rect x="100" y="530" width="280" height="50" rx="8" fill="url(#grad)"/>
+  <text x="150" y="562" font-family="Inter, sans-serif" font-size="20" font-weight="700" fill="#ffffff">Open to AI/ML Roles →</text>
+  <!-- Border accent -->
+  <rect x="0" y="626" width="1200" height="4" fill="url(#grad)"/>
+</svg>
