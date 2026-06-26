@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head><title>OG Image Generator</title></head>
+<body>
+<canvas id="c" width="1200" height="630"></canvas>
+<script>
+const c = document.getElementById('c');
+const ctx = c.getContext('2d');
+
+// Background
+ctx.fillStyle = '#0a0a0f';
+ctx.fillRect(0, 0, 1200, 630);
+
+// Top gradient bar
+const grad = ctx.createLinearGradient(0, 0, 1200, 0);
+grad.addColorStop(0, '#06b6d4');
+grad.addColorStop(1, '#8b5cf6');
+ctx.fillStyle = grad;
+ctx.fillRect(0, 0, 1200, 5);
+ctx.fillRect(0, 625, 1200, 5);
+
+// Name
+ctx.font = '900 68px Inter, sans-serif';
+ctx.fillStyle = '#f0f0f5';
+ctx.fillText('SUDISH KUMAR', 80, 200);
+
+// Subtitle
+ctx.font = '500 26px monospace';
+ctx.fillStyle = '#06b6d4';
+ctx.fillText('ML Engineer | Deep Learning | Generative AI | AWS SageMaker', 80, 260);
+
+// Description
+ctx.font = '400 21px Inter, sans-serif';
+ctx.fillStyle = '#a0a0b0';
+ctx.fillText('AWS-certified AI Practitioner & GenAI Developer at Amazon', 80, 340);
+ctx.fillText('Building production AI systems with 99%+ accuracy', 80, 375);
+
+// Stats
+ctx.font = '400 18px monospace';
+ctx.fillStyle = '#6b6b7b';
+ctx.fillText('2+ Years Amazon/AWS  •  10+ AI Initiatives  •  2 AWS Certifications  •  99%+ Accuracy', 80, 450);
+
+// CTA Button
+ctx.fillStyle = grad;
+ctx.beginPath();
+ctx.roundRect(80, 500, 300, 52, 8);
+ctx.fill();
+ctx.font = '700 19px Inter, sans-serif';
+ctx.fillStyle = '#ffffff';
+ctx.fillText('Open to AI/ML Roles →', 120, 532);
+
+// Download
+const link = document.createElement('a');
+link.download = 'og-image.png';
+link.href = c.toDataURL('image/png');
+link.textContent = 'Download og-image.png';
+link.style.cssText = 'display:block;margin:20px;color:cyan;font-size:20px';
+document.body.appendChild(link);
+document.body.style.background = '#222';
+</script>
+</body>
+</html>
