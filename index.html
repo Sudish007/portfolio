@@ -413,6 +413,20 @@
 <a href="Sudish-Kumar-Resume-2026.pdf" target="_blank" class="card clink"><svg aria-hidden="true"><use href="#i-doc"/></svg><div><small>Resume</small>Download my resume (PDF)</div></a>
 <button type="button" class="card clink" id="shareBtn" hidden><svg aria-hidden="true"><use href="#i-share"/></svg><div><small>Share</small>Send this page to a recruiter</div></button>
 </div>
+<form class="card cform reveal" id="msgForm" novalidate>
+<h3>📮 Or send it right here</h3>
+<p class="cform-sub">Delivered straight to my inbox and phone — no email app needed. Powered by this site's own API.</p>
+<div class="cform-row">
+<label>Your name<input type="text" id="mfName" name="name" required maxlength="100" autocomplete="name" placeholder="Priya Sharma"></label>
+<label>Email / phone / LinkedIn<input type="text" id="mfContact" name="contact" required maxlength="200" autocomplete="email" placeholder="priya@company.com"></label>
+</div>
+<label>Message<textarea id="mfBody" name="message" required minlength="10" maxlength="4000" rows="4" placeholder="Role, company, and what caught your eye…"></textarea></label>
+<input type="text" id="mfHp" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div class="cform-foot">
+<span class="cform-note" id="mfDone" hidden>✓ Delivered. I usually reply within a day.</span>
+<button class="btn btn-primary" id="msgSend" type="submit">Send message →</button>
+</div>
+</form>
 <div class="card freelance reveal">
 <h3>💼 Also Available for Freelance AI/ML Consulting</h3>
 <p>Need a custom ML model, data pipeline, or AI tool? I take projects from idea to production. Let's talk scope and timelines.</p>

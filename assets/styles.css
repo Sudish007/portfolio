@@ -382,6 +382,21 @@ section { padding: 108px 0; position: relative; }
 .clink small { display: block; font-size: .68rem; color: var(--muted); }
 .clink .cp { margin-left: auto; font-family: var(--mono); font-size: .68rem; color: var(--muted); padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px; transition: all .2s; }
 .clink .cp:hover { color: var(--accent); border-color: var(--accent); }
+/* contact form */
+.cform { margin-top: 44px; padding: 30px; text-align: left; }
+.cform h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 6px; }
+.cform-sub { color: var(--text2); font-size: .85rem; margin-bottom: 6px; }
+.cform label { display: block; font-size: .74rem; font-weight: 600; color: var(--text2); margin-top: 14px; }
+.cform input, .cform textarea { display: block; width: 100%; margin-top: 6px; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg2); color: var(--text); font: inherit; font-size: .88rem; }
+.cform input:focus, .cform textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.cform textarea { resize: vertical; min-height: 96px; }
+.cform-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 600px) { .cform-row { grid-template-columns: 1fr; } }
+.cform .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.cform-foot { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+.cform-note { color: var(--ok); font-size: .84rem; font-weight: 600; }
+.cform-foot .btn { margin-left: auto; }
+
 .freelance { margin-top: 44px; padding: 36px; text-align: center; }
 .freelance h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; }
 .freelance p { color: var(--text2); font-size: .9rem; margin-bottom: 20px; }
@@ -477,7 +492,7 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
 /* ---------- print (recruiters do print) ---------- */
 @media print {
   :root { --bg: #fff; --bg2: #fff; --card: #fff; --border: #ddd; --text: #000; --text2: #333; --muted: #666; --accent: #0e7490; --accent2: #6d28d9; --glow: transparent; }
-  .bg, .progress, .nav, .hero canvas, .cue, .ticker, .cmdk, .toast, .chips, .cta, .hire-btns, .freelance, .hud, .ring, .center, .clink .cp { display: none !important; }
+  .bg, .progress, .nav, .hero canvas, .cue, .ticker, .cmdk, .toast, .chips, .cta, .hire-btns, .freelance, .hud, .ring, .center, .clink .cp, .cform { display: none !important; }
   body { background: #fff; color: #000; }
   .hero { min-height: auto; padding: 24px 0; }
   section { padding: 22px 0; break-inside: avoid; }

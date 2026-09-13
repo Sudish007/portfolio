@@ -4,3 +4,4 @@
 _shots/
 _*.py
 _*.ps1
+node_modules/
