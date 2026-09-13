@@ -449,8 +449,12 @@ function initPalette() {
   add('Preferences', '🌗', 'Toggle dark / light theme', () => themeBtn?.click(), 'theme', 'dark light mode');
   [['en', '🇬🇧', 'English'], ['hi', '🇮🇳', 'हिन्दी (Hindi)'], ['bho', '🇮🇳', 'भोजपुरी (Bhojpuri)'], ['de', '🇩🇪', 'Deutsch'], ['fr', '🇫🇷', 'Français'], ['es', '🇪🇸', 'Español']]
     .forEach(([c, i, l]) => add('Language', i, l, () => setLang(c), c, 'language lang translate'));
-  add('Owner', '⚙️', 'Open admin editor', () => openUrl('admin.html'), '↗', 'admin edit config hide repos live projects');
-  add('Owner', '📝', 'Edit config.js on GitHub (raw)', () => openUrl('https://github.com/Sudish007/portfolio/edit/master/assets/config.js'), '↗', 'config raw github');
+  // Owner shortcuts only appear on devices where the admin token is stored (i.e. the owner's own browser).
+  let isOwner = false; try { isOwner = !!localStorage.getItem('sk-admin-token'); } catch { /* private mode */ }
+  if (isOwner) {
+    add('Owner', '⚙️', 'Open admin editor', () => openUrl('admin.html'), '↗', 'admin edit config hide repos live projects');
+    add('Owner', '📝', 'Edit config.js on GitHub (raw)', () => openUrl('https://github.com/Sudish007/portfolio/edit/master/assets/config.js'), '↗', 'config raw github');
+  }
 
   let view = [], sel = 0;
   const paint = () => { $$('.cmdk-it', list).forEach(b => b.setAttribute('aria-selected', String(+b.dataset.idx === sel))); const b = list.querySelector(`[data-idx="${sel}"]`); b?.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', b?.id || ''); };
