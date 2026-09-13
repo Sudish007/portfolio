@@ -1,0 +1,2 @@
+# Send the old Netlify subdomain to the custom domain (www -> apex is handled by Netlify automatically)
+https://sudishk.netlify.app/*  https://sudish.dev/:splat  301!
