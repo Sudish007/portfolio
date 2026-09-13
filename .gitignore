@@ -1,2 +1,6 @@
 # Local Netlify folder
 .netlify
+# Local dev/verification scripts and screenshots (underscore prefix = not deployed)
+_shots/
+_*.py
+_*.ps1
