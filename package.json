@@ -1,0 +1,9 @@
+{
+  "name": "sudish-dev",
+  "private": true,
+  "type": "module",
+  "description": "sudish.dev — static shell + Netlify Functions (config API, contact inbox)",
+  "dependencies": {
+    "@netlify/blobs": "10.7.13"
+  }
+}

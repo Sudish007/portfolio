@@ -57,6 +57,12 @@
   code { font-family: var(--mono); font-size: .9em; background: var(--glow); padding: 1px 6px; border-radius: 5px; }
   .offline-link { display: inline-block; margin-top: 14px; font-size: .78rem; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
   .offline-link:hover { color: var(--accent); }
+  .inbox-it .when { font-family: var(--mono); font-size: .7rem; color: var(--muted); }
+  .inbox-contact { font-family: var(--mono); font-size: .76rem; color: var(--accent); margin-top: 4px; word-break: break-all; }
+  .inbox-msg { font-size: .86rem; color: var(--text); margin-top: 8px; white-space: pre-wrap; word-break: break-word; }
+  .inbox-meta { font-family: var(--mono); font-size: .66rem; color: var(--muted); margin-top: 8px; word-break: break-all; }
+  .inbox-empty { color: var(--muted); font-size: .82rem; margin-top: 12px; }
+  .src-badge { font-family: var(--mono); font-size: .66rem; padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); color: var(--muted); }
 </style>
 </head>
 <body>
@@ -64,7 +70,7 @@
   <div class="admin-head">
     <div>
       <h1>⚙️ Site Admin</h1>
-      <p class="sub">Edits <code>assets/config.js</code> — Live Projects & GitHub sections. Each save = one commit = auto-deploy (~1 min).</p>
+      <p class="sub">Live Projects & GitHub sections + inbox. Saves apply to the live site <b>in seconds</b> — no redeploy.</p>
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span class="mode" id="mode">Locked</span>
@@ -96,7 +102,7 @@
         <li>Permissions → Repository permissions → <b>Contents: Read and write</b> (everything else: No access)</li>
         <li>Generate, copy the <code>github_pat_…</code> value, paste it above, Unlock.</li>
       </ol>
-      <p style="margin-top:8px">The token is stored only in this browser (localStorage), is sent only to <code>api.github.com</code>, and can at most edit files in the one selected repo. Revoke or rotate it anytime from GitHub settings.</p>
+      <p style="margin-top:8px">The token is stored only in this browser (localStorage) and sent only to <code>api.github.com</code> and this site's own <code>/api</code> endpoints, which verify it against GitHub on every save. It can at most edit files in the one selected repo. Revoke or rotate it anytime from GitHub settings.</p>
     </details>
     <button class="offline-link" id="offlineBtn" type="button">No token on this device? Open the offline generator (edits produce a file only the owner can commit) →</button>
   </div>
@@ -139,8 +145,15 @@
       <div class="btnrow"><button class="mini" id="addItem" style="padding:9px 16px">＋ Add project</button></div>
     </div>
 
+    <div class="panel" id="inboxPanel" hidden>
+      <h2>📮 Inbox <span class="hint" id="inboxCount"></span></h2>
+      <p class="hint" style="font-size:.78rem;color:var(--muted)">Messages sent through the site's contact form. Stored in Netlify Blobs; optionally forwarded to Telegram when <code>TELEGRAM_BOT_TOKEN</code> + <code>TELEGRAM_CHAT_ID</code> are set in Netlify env vars.</p>
+      <div class="btnrow"><button class="mini" id="inboxRefresh" type="button">↻ Refresh</button></div>
+      <div id="inboxList"></div>
+    </div>
+
     <div class="panel out" id="outPanel">
-      <h2>📋 Generated config.js <span class="hint">— offline mode: copy this into GitHub → assets/config.js</span></h2>
+      <h2>📋 Generated config.js <span class="hint">— fallback defaults: commit this to assets/config.js (the live site prefers the API config saved above)</span></h2>
       <textarea id="out" rows="14" readonly spellcheck="false"></textarea>
       <div class="btnrow">
         <button class="mini" id="copyOut" style="padding:9px 16px">Copy</button>
@@ -157,7 +170,6 @@
   <div class="wrap">
     <span class="dirty" id="dirty" hidden>● unsaved changes</span>
     <span class="spacer"></span>
-    <input type="text" id="commitMsg" placeholder="Commit message" value="Update site config via admin" style="max-width:280px">
     <button class="btn btn-ghost" id="revert" style="padding:10px 18px">Revert</button>
     <button class="btn btn-primary" id="save" style="padding:10px 22px">Save</button>
   </div>
@@ -166,10 +178,9 @@
 <script>
 (() => {
 'use strict';
-const OWNER = 'Sudish007', REPO = 'portfolio', BRANCH = 'master', PATH = 'assets/config.js';
-const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(PATH)}`;
+const OWNER = 'Sudish007';
 const $ = s => document.querySelector(s);
-const state = { cfg: null, orig: '', sha: null, token: '', dirty: false, unlocked: false };
+const state = { cfg: null, orig: '', token: '', dirty: false, unlocked: false, source: 'defaults' };
 
 /* ---------- config <-> js ---------- */
 const HEADER = `/* =====================================================================
@@ -186,8 +197,6 @@ function parseConfigJs(src) {
   return w.SK_CONFIG;
 }
 const serializeConfig = cfg => HEADER + 'window.SK_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
-const b64e = s => { const b = new TextEncoder().encode(s); let x = ''; for (const c of b) x += String.fromCharCode(c); return btoa(x); };
-const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
 
 function msg(el, kind, text) { el.className = 'msg ' + kind; el.textContent = text; if (kind === 'ok') setTimeout(() => { if (el.textContent === text) el.className = 'msg'; }, 6000); }
 
@@ -289,30 +298,80 @@ function updateOut() { $('#out').value = serializeConfig(state.cfg); }
 document.addEventListener('input', e => { if (state.unlocked && e.target.closest('#editor') && !e.target.closest('#outPanel')) touch(); });
 addEventListener('beforeunload', e => { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
 
-/* ---------- GitHub API ---------- */
-const ghHeaders = () => ({ Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' });
-async function ghLoad() {
-  const r = await fetch(`${API}?ref=${BRANCH}`, { headers: ghHeaders() });
-  if (r.status === 401) throw new Error('Token rejected (401). Check it was copied fully and has Contents access to ' + OWNER + '/' + REPO + '.');
-  if (r.status === 404) throw new Error('config.js not found via API (404) — token may lack access to the repo.');
+/* ---------- backend API (Netlify Functions + Blobs) ---------- */
+// Identity: the GitHub token proves you're the owner. Client-side we check it once for
+// a friendly error; the server (/api/config, /api/messages) re-verifies on every call.
+async function ghWhoAmI(token) {
+  const r = await fetch('https://api.github.com/user', {
+    headers: { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' }
+  });
+  if (r.status === 401) throw new Error('Token rejected by GitHub (401). Check it was copied fully and has not expired.');
   if (!r.ok) throw new Error('GitHub API error ' + r.status);
-  const j = await r.json();
-  return { text: b64d(j.content), sha: j.sha };
+  return (await r.json()).login;
 }
-async function ghSave(text, message) {
-  const r = await fetch(API, { method: 'PUT', headers: ghHeaders(), body: JSON.stringify({ message, content: b64e(text), sha: state.sha, branch: BRANCH }) });
-  if (r.status === 409) throw new Error('Conflict: the file changed on GitHub since you loaded it. Reload this page and re-apply your edits.');
-  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('Save failed (' + r.status + '): ' + (j.message || 'unknown error')); }
-  return (await r.json()).content.sha;
+// Live config: what the site actually serves. Falls back to the committed defaults file.
+async function apiLoadConfig() {
+  try {
+    const r = await fetch('/api/config', { cache: 'no-store' });
+    if (r.ok) {
+      const j = await r.json();
+      if (j?.config?.github && j?.config?.liveProjects) return { cfg: j.config, source: 'live' };
+    }
+  } catch { /* API unreachable (e.g. plain static hosting) */ }
+  const r = await fetch('assets/config.js', { cache: 'no-store' });
+  return { cfg: parseConfigJs(await r.text()), source: 'defaults' };
 }
+async function apiSaveConfig(cfg) {
+  const r = await fetch('/api/config', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token },
+    body: JSON.stringify({ config: cfg })
+  });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) throw new Error('Server rejected the token (401) — reconnect and try again.');
+  if (!r.ok || !j.ok) throw new Error('Save failed (' + r.status + '): ' + (j.error || 'unknown error'));
+}
+
+/* ---------- inbox ---------- */
+async function loadInbox() {
+  const list = $('#inboxList'), count = $('#inboxCount');
+  try {
+    const r = await fetch('/api/messages', { headers: { Authorization: 'Bearer ' + state.token }, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const { messages } = await r.json();
+    count.textContent = messages.length ? `— ${messages.length} message${messages.length > 1 ? 's' : ''}` : '— empty';
+    list.textContent = '';
+    if (!messages.length) { list.append(h('p', { class: 'inbox-empty' }, 'No messages yet. The contact form on the site delivers here.')); return; }
+    messages.forEach(m => {
+      list.append(h('div', { class: 'item inbox-it' },
+        h('div', { class: 'item-head' },
+          h('span', { class: 'nm' }, m.name || '(no name)'),
+          h('span', { class: 'when' }, m.at ? new Date(m.at).toLocaleString() : ''),
+          h('button', { class: 'mini danger', type: 'button', onclick: async () => {
+            if (!confirm('Delete this message?')) return;
+            await fetch('/api/messages?key=' + encodeURIComponent(m.key), { method: 'DELETE', headers: { Authorization: 'Bearer ' + state.token } });
+            loadInbox();
+          } }, '🗑')),
+        h('div', { class: 'inbox-contact' }, m.contact || ''),
+        h('p', { class: 'inbox-msg' }, m.message || ''),
+        h('div', { class: 'inbox-meta' }, [m.ip, m.ua].filter(Boolean).join(' · '))));
+    });
+  } catch (e) {
+    count.textContent = '';
+    list.textContent = '';
+    list.append(h('p', { class: 'inbox-empty' }, 'Inbox unavailable: ' + e.message));
+  }
+}
+$('#inboxRefresh').addEventListener('click', loadInbox);
 
 /* ---------- lock / unlock ---------- */
 function setMode(connected) {
-  $('#mode').textContent = connected ? 'Connected — saves commit to GitHub' : 'Offline mode';
+  $('#mode').textContent = connected ? 'Connected — saves go live in seconds' : 'Offline mode';
   $('#mode').classList.toggle('on', connected);
   $('#outPanel').classList.toggle('show', !connected);
   $('#forget').hidden = !connected;
-  $('#save').textContent = connected ? 'Save & deploy' : 'Generate file';
+  $('#inboxPanel').hidden = !connected;
+  $('#save').textContent = connected ? 'Save live' : 'Generate file';
 }
 function unlock(connected) {
   state.unlocked = true;
@@ -328,13 +387,19 @@ function lockAgain() {
   $('#mode').textContent = 'Locked'; $('#mode').classList.remove('on'); $('#forget').hidden = true;
 }
 async function connect(token, silent) {
-  state.token = token;
   try {
-    const { text, sha } = await ghLoad();
-    state.cfg = parseConfigJs(text); state.orig = serializeConfig(state.cfg); state.sha = sha; state.dirty = false; $('#dirty').hidden = true;
+    const login = await ghWhoAmI(token);
+    if (login !== OWNER) throw new Error(`This token belongs to "${login}", not ${OWNER} — only the owner's token unlocks saving.`);
+    state.token = token;
+    const { cfg, source } = await apiLoadConfig();
+    state.cfg = cfg; state.source = source;
+    state.orig = serializeConfig(state.cfg); state.dirty = false; $('#dirty').hidden = true;
     unlock(true);
+    loadInbox();
     if ($('#remember').checked) try { localStorage.setItem('sk-admin-token', token); } catch {}
-    if (!silent) msg($('#connMsg'), 'ok', 'Connected — loaded config.js from ' + OWNER + '/' + REPO + '@' + BRANCH + '.');
+    if (!silent) msg($('#connMsg'), 'ok', source === 'live'
+      ? 'Connected — editing the live config (served by /api/config).'
+      : 'Connected — no live config saved yet, starting from the committed defaults. First "Save live" switches the site to the API config.');
   } catch (e) {
     state.token = '';
     msg($('#connMsg'), 'err', e.message);
@@ -351,14 +416,15 @@ $('#save').addEventListener('click', async () => {
   if (bad) return msg($('#msg'), 'err', `"${bad.name}": link fields must start with http(s):// (or be empty).`);
   const text = serializeConfig(state.cfg);
   try { parseConfigJs(text); } catch (e) { return msg($('#msg'), 'err', 'Internal serialization error: ' + e.message); }
-  if (!state.token) { updateOut(); $('#outPanel').classList.add('show'); $('#outPanel').scrollIntoView({ behavior: 'smooth' }); msg($('#msg'), 'ok', 'File generated below — copy or download it, then paste into GitHub.'); return; }
+  if (!state.token) { updateOut(); $('#outPanel').classList.add('show'); $('#outPanel').scrollIntoView({ behavior: 'smooth' }); msg($('#msg'), 'ok', 'File generated below — copy or download it, then commit as assets/config.js (fallback defaults).'); return; }
   $('#save').disabled = true; $('#save').textContent = 'Saving…';
   try {
-    state.sha = await ghSave(text, $('#commitMsg').value.trim() || 'Update site config via admin');
+    await apiSaveConfig(state.cfg);
+    state.source = 'live';
     state.orig = text; state.dirty = false; $('#dirty').hidden = true;
-    msg($('#msg'), 'ok', 'Committed ✓ Netlify is deploying — the live site updates in about a minute.');
+    msg($('#msg'), 'ok', 'Live ✓ The site is already serving this config — refresh sudish.dev to see it.');
   } catch (e) { msg($('#msg'), 'err', e.message); }
-  $('#save').disabled = false; $('#save').textContent = 'Save & deploy';
+  $('#save').disabled = false; $('#save').textContent = 'Save live';
 });
 $('#revert').addEventListener('click', () => { if (!state.dirty || confirm('Discard unsaved changes?')) { state.cfg = parseConfigJs(state.orig); state.dirty = false; $('#dirty').hidden = true; fillForm(); } });
 $('#copyOut').addEventListener('click', () => navigator.clipboard?.writeText($('#out').value).then(() => msg($('#msg'), 'ok', 'Copied.')));
@@ -367,10 +433,10 @@ $('#dlOut').addEventListener('click', () => { const a = document.createElement('
 /* ---------- boot ---------- */
 (async function boot() {
   try {
-    const r = await fetch('assets/config.js', { cache: 'no-store' });
-    state.cfg = parseConfigJs(await r.text());
+    const { cfg, source } = await apiLoadConfig();   // offline generator starts from the live config too
+    state.cfg = cfg; state.source = source;
     state.orig = serializeConfig(state.cfg);
-  } catch (e) { msg($('#connMsg'), 'err', 'Could not load assets/config.js: ' + e.message); return; }
+  } catch (e) { msg($('#connMsg'), 'err', 'Could not load config: ' + e.message); return; }
   let saved = ''; try { saved = localStorage.getItem('sk-admin-token') || ''; } catch {}
   if (saved) { $('#token').value = saved; connect(saved, true); }
 })();

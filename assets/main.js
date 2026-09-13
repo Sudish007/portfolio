@@ -11,7 +11,7 @@
 /* ---------- helpers ---------- */
 const $  = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
-const CFG = window.SK_CONFIG || {};
+let CFG = window.SK_CONFIG || {};   // committed defaults; may be replaced by the live config from /api/config
 const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 const supportsView   = CSS.supports('animation-timeline: view()');
 const supportsScroll = CSS.supports('animation-timeline: scroll()');
@@ -443,6 +443,7 @@ function initPalette() {
   add('Actions', '💬', 'WhatsApp Sudish', () => openUrl('https://wa.me/919870176701?text=Hi%20Sudish!'), '↗', 'chat message');
   add('Actions', '✉️', 'Email Sudish', () => { location.href = 'mailto:sudishnit@gmail.com'; }, 'mailto', 'contact');
   add('Actions', '📋', 'Copy email address', () => copyText('sudishnit@gmail.com'), 'clipboard', 'contact');
+  add('Actions', '📮', 'Send me a message (form)', () => { const f = $('#msgForm'); if (f) jump(f, true); }, 'form', 'contact message recruiter hire');
   add('Actions', '🔗', 'LinkedIn profile', () => openUrl('https://linkedin.com/in/simplysudish'), '↗');
   add('Actions', '🐙', 'GitHub profile', () => openUrl('https://github.com/Sudish007'), '↗');
   if (navigator.share) add('Actions', '📤', 'Share this page', share, 'share');
@@ -501,9 +502,51 @@ function initContact() {
   const sb = $('#shareBtn'); if (sb && navigator.share) { sb.hidden = false; sb.addEventListener('click', share); }
 }
 
+/* ---------- contact form (/api/contact) ---------- */
+function initContactForm() {
+  const f = $('#msgForm'); if (!f) return;
+  const t0 = Date.now();                    // bot time-trap: server rejects submissions faster than 3 s
+  f.addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('#msgSend');
+    const data = {
+      name: $('#mfName').value.trim(),
+      contact: $('#mfContact').value.trim(),
+      message: $('#mfBody').value.trim(),
+      website: $('#mfHp').value,            // honeypot: humans never see this field
+      t0
+    };
+    if (!data.name || !data.contact) return toast('Name and a way to reach you, please.');
+    if (data.message.length < 10) return toast('Message is a bit short — add a few details.');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) throw new Error(j.error || 'send failed');
+      f.reset();
+      $('#mfDone').hidden = false;
+      toast('Sent ✓ I usually reply within a day.');
+    } catch {
+      toast('Could not send right now — WhatsApp or email me instead.');
+    }
+    btn.disabled = false; btn.textContent = 'Send message →';
+  });
+}
+
+/* ---------- live config from /api/config (Netlify Blobs) ---------- */
+async function loadRemoteConfig() {
+  try {
+    const ctl = new AbortController();
+    const t = setTimeout(() => ctl.abort(), 2500);
+    const r = await fetch('/api/config', { signal: ctl.signal, cache: 'no-store' });
+    clearTimeout(t);
+    if (!r.ok) return;                       // static hosting / API down -> keep committed defaults
+    const j = await r.json();
+    if (j?.config?.github && j?.config?.liveProjects) CFG = j.config;
+  } catch { /* offline or timeout -> defaults */ }
+}
+
 /* ---------- boot ---------- */
-applySectionToggles();
-renderLive();
 initTheme();
 initI18n();
 initNav();
@@ -514,7 +557,14 @@ initCountUps();
 initTypewriter();
 initClock();
 initFilters();
-initPalette();
 initContact();
-github().then(observeReveals).catch(() => {});
+initContactForm();
+// Config-driven sections render once the live config answers (or immediately on fallback).
+loadRemoteConfig().then(() => {
+  applySectionToggles();
+  renderLive();
+  initPalette();
+  observeReveals();
+  github().then(observeReveals).catch(() => {});
+});
 })();

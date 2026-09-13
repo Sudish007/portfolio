@@ -1,0 +1,9 @@
+# sudish.dev — Netlify configuration
+# Static site published from the repo root + serverless functions under /api/*.
+
+[build]
+  publish = "."
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
