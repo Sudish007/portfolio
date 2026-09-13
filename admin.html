@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — sudish.dev</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a0a0f'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='%23f59e0b' font-family='monospace' font-weight='bold'>SK</text></svg>">
+<link rel="stylesheet" href="assets/styles.css">
+<script>(function(){try{var t=localStorage.getItem('sk-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}document.documentElement.classList.add('js');})();</script>
+<style>
+  body { padding: 40px 0 120px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  .admin-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+  .admin-head h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -.02em; }
+  .admin-head .sub { color: var(--muted); font-size: .82rem; }
+  .mode { font-family: var(--mono); font-size: .72rem; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border); background: var(--card); color: var(--text2); }
+  .mode.on { color: var(--ok); border-color: color-mix(in oklab, var(--ok) 40%, transparent); }
+  .panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 20px; margin-top: 18px; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  .panel h2 { font-size: .95rem; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+  .panel h2 .hint, label .hint { color: var(--muted); font-weight: 400; font-size: .74rem; }
+  .frow { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+  label { display: block; font-size: .74rem; font-weight: 600; color: var(--text2); }
+  label > span { display: block; margin-bottom: 5px; }
+  input[type="text"], input[type="password"], input[type="number"], input[type="url"], textarea, select {
+    width: 100%; padding: 9px 11px; border-radius: 10px; border: 1px solid var(--border); background: var(--bg2);
+    color: var(--text); font: inherit; font-size: .84rem; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { resize: vertical; min-height: 64px; font-family: var(--mono); font-size: .78rem; line-height: 1.5; }
+  .check { display: inline-flex; align-items: center; gap: 8px; font-size: .8rem; color: var(--text2); font-weight: 500; cursor: pointer; }
+  .check input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; align-items: center; }
+  .item { border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 12px; background: var(--bg2); }
+  .item.off { opacity: .55; border-style: dashed; }
+  .item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .item-head .nm { font-weight: 800; font-size: .95rem; flex: 1; min-width: 120px; }
+  .mini { padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text2); font-size: .72rem; font-weight: 600; cursor: pointer; }
+  .mini:hover { border-color: var(--accent); color: var(--accent); }
+  .mini.danger:hover { border-color: #ef4444; color: #ef4444; }
+  .savebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 100; background: var(--nav-bg); -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); border-top: 1px solid var(--border); padding: 12px 0; }
+  .savebar .wrap { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .savebar .spacer { flex: 1; }
+  .dirty { font-family: var(--mono); font-size: .72rem; color: var(--accent3); }
+  .msg { font-size: .8rem; margin-top: 10px; padding: 10px 12px; border-radius: 10px; display: none; }
+  .msg.err { display: block; background: color-mix(in oklab, #ef4444 12%, transparent); color: #fca5a5; border: 1px solid color-mix(in oklab, #ef4444 35%, transparent); }
+  .msg.ok { display: block; background: color-mix(in oklab, #10b981 12%, transparent); color: #6ee7b7; border: 1px solid color-mix(in oklab, #10b981 35%, transparent); }
+  [data-theme="light"] .msg.err { color: #b91c1c; } [data-theme="light"] .msg.ok { color: #047857; }
+  .out { display: none; }
+  .out.show { display: block; }
+  details.help { margin-top: 10px; font-size: .8rem; color: var(--text2); }
+  details.help summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+  details.help ol { margin: 10px 0 0 18px; display: grid; gap: 6px; }
+  code { font-family: var(--mono); font-size: .9em; background: var(--glow); padding: 1px 6px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="admin-head">
+    <div>
+      <h1>⚙️ Site Admin</h1>
+      <p class="sub">Edits <code>assets/config.js</code> — Live Projects & GitHub sections. Each save = one commit = auto-deploy (~1 min).</p>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="mode" id="mode">Offline mode</span>
+      <a class="mini" href="./" target="_blank" rel="noopener">View site ↗</a>
+    </div>
+  </div>
+
+  <!-- Connection -->
+  <div class="panel">
+    <h2>🔑 GitHub connection <span class="hint">— optional but recommended: lets Save commit directly</span></h2>
+    <div class="frow" style="grid-template-columns: 1fr auto auto; align-items: end;">
+      <label><span>Fine-grained personal access token</span><input type="password" id="token" placeholder="github_pat_…" autocomplete="off"></label>
+      <label class="check" style="align-self:center;margin-top:18px"><input type="checkbox" id="remember" checked> Remember on this device</label>
+      <button class="mini" id="connect" style="padding:9px 16px">Connect</button>
+    </div>
+    <div class="btnrow"><button class="mini danger" id="forget" hidden>Forget token</button></div>
+    <details class="help">
+      <summary>How to create the token (2 minutes, do it once)</summary>
+      <ol>
+        <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a></li>
+        <li>Token name: <code>portfolio-admin</code> · Expiration: 1 year</li>
+        <li>Repository access → <b>Only select repositories</b> → <code>Sudish007/portfolio</code></li>
+        <li>Permissions → Repository permissions → <b>Contents: Read and write</b> (leave everything else at No access)</li>
+        <li>Generate, copy the <code>github_pat_…</code> value, paste it above, Connect.</li>
+      </ol>
+      <p style="margin-top:8px">The token is stored only in this browser (localStorage), sent only to <code>api.github.com</code>, and can at most edit files in the portfolio repo. Revoke it anytime from GitHub settings.</p>
+    </details>
+    <div class="msg" id="connMsg"></div>
+  </div>
+
+  <!-- Sections on/off -->
+  <div class="panel">
+    <h2>👁 Sections</h2>
+    <div class="btnrow">
+      <label class="check"><input type="checkbox" id="liveEnabled"> Show “Live Projects” section</label>
+      <label class="check"><input type="checkbox" id="ghEnabled"> Show “Live from GitHub” section</label>
+    </div>
+  </div>
+
+  <!-- GitHub feed settings -->
+  <div class="panel">
+    <h2>🐙 GitHub feed</h2>
+    <div class="frow">
+      <label><span>GitHub username</span><input type="text" id="ghUser"></label>
+      <label><span>Repo cards to show</span><input type="number" id="ghMax" min="1" max="24"></label>
+      <label><span>Cache (minutes)</span><input type="number" id="ghCache" min="0" max="1440"></label>
+    </div>
+    <div class="btnrow">
+      <label class="check"><input type="checkbox" id="ghForks"> Hide forks</label>
+      <label class="check"><input type="checkbox" id="ghArchived"> Hide archived</label>
+    </div>
+    <div class="frow" style="grid-template-columns: 1fr 1fr;">
+      <label><span>Hidden repos <span class="hint">(one per line — for public repos you don't want featured; private repos never appear)</span></span><textarea id="ghHide" rows="6"></textarea></label>
+      <label><span>Pinned repos <span class="hint">(one per line — always shown first)</span></span><textarea id="ghPin" rows="6"></textarea></label>
+    </div>
+  </div>
+
+  <!-- Live projects -->
+  <div class="panel">
+    <h2>🚀 Live Projects</h2>
+    <div class="frow">
+      <label><span>Eyebrow</span><input type="text" id="lpEyebrow"></label>
+      <label><span>Title</span><input type="text" id="lpTitle"></label>
+    </div>
+    <label style="margin-top:12px"><span>Intro line</span><textarea id="lpLede" rows="2"></textarea></label>
+    <div id="items"></div>
+    <div class="btnrow"><button class="mini" id="addItem" style="padding:9px 16px">＋ Add project</button></div>
+  </div>
+
+  <!-- Offline output -->
+  <div class="panel out" id="outPanel">
+    <h2>📋 Generated config.js <span class="hint">— offline mode: copy this into GitHub → assets/config.js</span></h2>
+    <textarea id="out" rows="14" readonly spellcheck="false"></textarea>
+    <div class="btnrow">
+      <button class="mini" id="copyOut" style="padding:9px 16px">Copy</button>
+      <button class="mini" id="dlOut" style="padding:9px 16px">Download config.js</button>
+      <a class="mini" style="padding:9px 16px" href="https://github.com/Sudish007/portfolio/edit/master/assets/config.js" target="_blank" rel="noopener">Open GitHub editor ↗</a>
+    </div>
+  </div>
+
+  <div class="msg" id="msg"></div>
+</div>
+
+<div class="savebar">
+  <div class="wrap">
+    <span class="dirty" id="dirty" hidden>● unsaved changes</span>
+    <span class="spacer"></span>
+    <input type="text" id="commitMsg" placeholder="Commit message" value="Update site config via admin" style="max-width:280px">
+    <button class="btn btn-ghost" id="revert" style="padding:10px 18px">Revert</button>
+    <button class="btn btn-primary" id="save" style="padding:10px 22px">Save</button>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+const OWNER = 'Sudish007', REPO = 'portfolio', BRANCH = 'master', PATH = 'assets/config.js';
+const API = `https://api.github.com/repos/${OWNER}/${REPO}/contents/${encodeURIComponent(PATH)}`;
+const $ = s => document.querySelector(s);
+const state = { cfg: null, orig: '', sha: null, token: '', dirty: false };
+
+/* ---------- config <-> js ---------- */
+const HEADER = `/* =====================================================================
+   sudish.dev — SITE CONFIG
+   Edited via /admin.html (or by hand — the admin editor picks up manual
+   changes). Each commit auto-deploys on Netlify in ~1 minute.
+   Field reference: see admin.html form labels.
+   ===================================================================== */
+`;
+function parseConfigJs(src) {
+  const w = {};
+  new Function('window', src + '\n;return window;')(w);
+  if (!w.SK_CONFIG || typeof w.SK_CONFIG !== 'object') throw new Error('window.SK_CONFIG not found in file');
+  return w.SK_CONFIG;
+}
+const serializeConfig = cfg => HEADER + 'window.SK_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
+const b64e = s => { const b = new TextEncoder().encode(s); let x = ''; for (const c of b) x += String.fromCharCode(c); return btoa(x); };
+const b64d = s => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, '')), c => c.charCodeAt(0)));
+
+/* ---------- messages ---------- */
+function msg(el, kind, text) { el.className = 'msg ' + kind; el.textContent = text; if (kind === 'ok') setTimeout(() => { if (el.textContent === text) el.className = 'msg'; }, 6000); }
+
+/* ---------- form <-> state ---------- */
+const lines = t => t.split('\n').map(s => s.trim()).filter(Boolean);
+function fillForm() {
+  const c = state.cfg, g = c.github ||= {}, l = c.liveProjects ||= {};
+  $('#liveEnabled').checked = l.enabled !== false;
+  $('#ghEnabled').checked = g.enabled !== false;
+  $('#ghUser').value = g.user || 'Sudish007';
+  $('#ghMax').value = g.maxRepos ?? 6;
+  $('#ghCache').value = g.cacheMinutes ?? 60;
+  $('#ghForks').checked = g.hideForks !== false;
+  $('#ghArchived').checked = g.hideArchived !== false;
+  $('#ghHide').value = (g.hideRepos || []).join('\n');
+  $('#ghPin').value = (g.pinRepos || []).join('\n');
+  $('#lpEyebrow').value = l.eyebrow || '';
+  $('#lpTitle').value = l.title || '';
+  $('#lpLede').value = l.lede || '';
+  renderItems();
+  updateOut();
+}
+function readForm() {
+  const c = state.cfg, g = c.github, l = c.liveProjects;
+  l.enabled = $('#liveEnabled').checked;
+  g.enabled = $('#ghEnabled').checked;
+  g.user = $('#ghUser').value.trim() || 'Sudish007';
+  g.maxRepos = Math.max(1, parseInt($('#ghMax').value, 10) || 6);
+  g.cacheMinutes = Math.max(0, parseInt($('#ghCache').value, 10) || 0);
+  g.hideForks = $('#ghForks').checked;
+  g.hideArchived = $('#ghArchived').checked;
+  g.hideRepos = lines($('#ghHide').value);
+  g.pinRepos = lines($('#ghPin').value);
+  l.eyebrow = $('#lpEyebrow').value.trim();
+  l.title = $('#lpTitle').value.trim();
+  l.lede = $('#lpLede').value.trim();
+}
+
+/* project items — DOM built with createElement (values never go through innerHTML) */
+const FIELDS = [
+  ['name', 'Name', 'text'], ['icon', 'Icon (emoji)', 'text'], ['color', 'Accent color', 'color'],
+  ['type', 'Type', 'select', ['web', 'android', 'android+web']], ['status', 'Status badge', 'text'],
+  ['website', 'Website URL', 'url'], ['playStore', 'Play Store URL', 'url'], ['apk', 'APK download URL', 'url'], ['repo', 'Source repo URL', 'url']
+];
+function h(tag, attrs = {}, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) { if (k === 'class') el.className = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v); }
+  el.append(...kids); return el;
+}
+function renderItems() {
+  const box = $('#items'); box.textContent = '';
+  const items = state.cfg.liveProjects.items ||= [];
+  items.forEach((it, i) => {
+    const head = h('div', { class: 'item-head' },
+      h('span', { class: 'nm' }, `${it.icon || '🚀'} ${it.name || 'Untitled'}`),
+      h('button', { class: 'mini', type: 'button', title: 'Move up', onclick: () => { if (i > 0) { [items[i - 1], items[i]] = [items[i], items[i - 1]]; touch(); renderItems(); } } }, '↑'),
+      h('button', { class: 'mini', type: 'button', title: 'Move down', onclick: () => { if (i < items.length - 1) { [items[i + 1], items[i]] = [items[i], items[i + 1]]; touch(); renderItems(); } } }, '↓'),
+      (() => { const cb = h('input', { type: 'checkbox' }); cb.checked = it.hidden === true; cb.addEventListener('change', () => { it.hidden = cb.checked ? true : undefined; if (!cb.checked) delete it.hidden; touch(); card.classList.toggle('off', !!it.hidden); }); return h('label', { class: 'check' }, cb, ' hidden'); })(),
+      h('button', { class: 'mini danger', type: 'button', onclick: () => { if (confirm(`Delete "${it.name}" from Live Projects?`)) { items.splice(i, 1); touch(); renderItems(); } } }, '🗑 delete'));
+    const grid = h('div', { class: 'frow' });
+    for (const [key, label, kind, opts] of FIELDS) {
+      let input;
+      if (kind === 'select') {
+        input = h('select', {}); (opts || []).forEach(o => input.append(h('option', { value: o }, o)));
+        input.value = it[key] || opts[0];
+      } else if (kind === 'color') {
+        input = h('input', { type: 'color' }); input.value = /^#[0-9a-f]{6}$/i.test(it[key] || '') ? it[key] : '#06b6d4'; input.style.height = '38px'; input.style.padding = '3px';
+      } else {
+        input = h('input', { type: kind === 'url' ? 'text' : 'text' }); input.value = it[key] || '';
+        if (kind === 'url') input.placeholder = 'https://… (empty = hide button)';
+      }
+      input.addEventListener('input', () => {
+        const v = input.value.trim();
+        if (v) it[key] = v; else delete it[key];
+        if (key === 'name' || key === 'icon') head.querySelector('.nm').textContent = `${it.icon || '🚀'} ${it.name || 'Untitled'}`;
+        touch();
+      });
+      grid.append(h('label', {}, h('span', {}, label), input));
+    }
+    const tagline = h('textarea', { rows: '2' }); tagline.value = it.tagline || '';
+    tagline.addEventListener('input', () => { it.tagline = tagline.value.trim(); touch(); });
+    const tags = h('input', { type: 'text', placeholder: 'FastAPI, Python, …' }); tags.value = (it.tags || []).join(', ');
+    tags.addEventListener('input', () => { it.tags = tags.value.split(',').map(s => s.trim()).filter(Boolean); touch(); });
+    const card = h('div', { class: 'item' + (it.hidden ? ' off' : '') }, head, grid,
+      h('label', { style: 'margin-top:12px' }, h('span', {}, 'Tagline (one or two sentences)'), tagline),
+      h('label', { style: 'margin-top:12px' }, h('span', {}, 'Tech tags (comma-separated)'), tags));
+    box.append(card);
+  });
+}
+$('#addItem').addEventListener('click', () => {
+  state.cfg.liveProjects.items.push({ name: 'New project', icon: '🚀', color: '#06b6d4', type: 'web', status: 'Live', tagline: '', tags: [], website: '', playStore: '', apk: '', repo: '' });
+  touch(); renderItems();
+  const cards = document.querySelectorAll('.item'); cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* ---------- dirty tracking + output ---------- */
+function touch() { readForm(); state.dirty = serializeConfig(state.cfg) !== state.orig; $('#dirty').hidden = !state.dirty; updateOut(); }
+function updateOut() { $('#out').value = serializeConfig(state.cfg); }
+document.addEventListener('input', e => { if (e.target.closest('.panel') && !e.target.closest('#outPanel') && e.target.id !== 'token') touch(); });
+addEventListener('beforeunload', e => { if (state.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ---------- GitHub API ---------- */
+const ghHeaders = () => ({ Accept: 'application/vnd.github+json', Authorization: 'Bearer ' + state.token, 'X-GitHub-Api-Version': '2022-11-28' });
+async function ghLoad() {
+  const r = await fetch(`${API}?ref=${BRANCH}`, { headers: ghHeaders() });
+  if (r.status === 401) throw new Error('Token rejected (401). Check it was copied fully and has Contents access to ' + OWNER + '/' + REPO + '.');
+  if (r.status === 404) throw new Error('config.js not found via API (404) — token may lack access to the repo.');
+  if (!r.ok) throw new Error('GitHub API error ' + r.status);
+  const j = await r.json();
+  return { text: b64d(j.content), sha: j.sha };
+}
+async function ghSave(text, message) {
+  const r = await fetch(API, { method: 'PUT', headers: ghHeaders(), body: JSON.stringify({ message, content: b64e(text), sha: state.sha, branch: BRANCH }) });
+  if (r.status === 409) throw new Error('Conflict: the file changed on GitHub since you loaded it. Reload this page and re-apply your edits.');
+  if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error('Save failed (' + r.status + '): ' + (j.message || 'unknown error')); }
+  return (await r.json()).content.sha;
+}
+
+/* ---------- boot / connect ---------- */
+function setMode(connected) {
+  $('#mode').textContent = connected ? 'Connected — saves commit to GitHub' : 'Offline mode';
+  $('#mode').classList.toggle('on', connected);
+  $('#outPanel').classList.toggle('show', !connected);
+  $('#forget').hidden = !connected;
+  $('#save').textContent = connected ? 'Save & deploy' : 'Generate file';
+}
+async function connect(token, silent) {
+  state.token = token;
+  try {
+    const { text, sha } = await ghLoad();
+    state.cfg = parseConfigJs(text); state.orig = serializeConfig(state.cfg); state.sha = sha; state.dirty = false; $('#dirty').hidden = true;
+    fillForm(); setMode(true);
+    if ($('#remember').checked) try { localStorage.setItem('sk-admin-token', token); } catch {}
+    if (!silent) msg($('#connMsg'), 'ok', 'Connected. Loaded config.js from ' + OWNER + '/' + REPO + '@' + BRANCH + '.');
+  } catch (e) {
+    state.token = ''; setMode(false);
+    msg($('#connMsg'), 'err', e.message);
+  }
+}
+$('#connect').addEventListener('click', () => { const t = $('#token').value.trim(); if (t) connect(t, false); else msg($('#connMsg'), 'err', 'Paste a token first.'); });
+$('#forget').addEventListener('click', () => { try { localStorage.removeItem('sk-admin-token'); } catch {} state.token = ''; $('#token').value = ''; setMode(false); msg($('#connMsg'), 'ok', 'Token removed from this browser.'); });
+
+$('#save').addEventListener('click', async () => {
+  readForm();
+  const bad = (state.cfg.liveProjects.items || []).find(it => ['website', 'playStore', 'apk', 'repo'].some(k => it[k] && !/^https?:\/\//i.test(it[k])));
+  if (bad) return msg($('#msg'), 'err', `"${bad.name}": link fields must start with http(s):// (or be empty).`);
+  const text = serializeConfig(state.cfg);
+  try { parseConfigJs(text); } catch (e) { return msg($('#msg'), 'err', 'Internal serialization error: ' + e.message); }
+  if (!state.token) { updateOut(); $('#outPanel').classList.add('show'); $('#outPanel').scrollIntoView({ behavior: 'smooth' }); msg($('#msg'), 'ok', 'File generated below — copy or download it, then paste into GitHub.'); return; }
+  $('#save').disabled = true; $('#save').textContent = 'Saving…';
+  try {
+    state.sha = await ghSave(text, $('#commitMsg').value.trim() || 'Update site config via admin');
+    state.orig = text; state.dirty = false; $('#dirty').hidden = true;
+    msg($('#msg'), 'ok', 'Committed ✓ Netlify is deploying — the live site updates in about a minute.');
+  } catch (e) { msg($('#msg'), 'err', e.message); }
+  $('#save').disabled = false; $('#save').textContent = 'Save & deploy';
+});
+$('#revert').addEventListener('click', () => { if (!state.dirty || confirm('Discard unsaved changes?')) { state.cfg = parseConfigJs(state.orig); state.dirty = false; $('#dirty').hidden = true; fillForm(); } });
+$('#copyOut').addEventListener('click', () => navigator.clipboard?.writeText($('#out').value).then(() => msg($('#msg'), 'ok', 'Copied.')));
+$('#dlOut').addEventListener('click', () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([$('#out').value], { type: 'text/javascript' })); a.download = 'config.js'; a.click(); URL.revokeObjectURL(a.href); });
+
+(async function boot() {
+  // Offline bootstrap: load the currently deployed config from the site itself.
+  try {
+    const r = await fetch('assets/config.js', { cache: 'no-store' });
+    state.cfg = parseConfigJs(await r.text());
+    state.orig = serializeConfig(state.cfg);
+    fillForm(); setMode(false);
+  } catch (e) { msg($('#msg'), 'err', 'Could not load assets/config.js: ' + e.message); return; }
+  let saved = ''; try { saved = localStorage.getItem('sk-admin-token') || ''; } catch {}
+  if (saved) { $('#token').value = saved; connect(saved, true); }
+})();
+})();
+</script>
+</body>
+</html>
