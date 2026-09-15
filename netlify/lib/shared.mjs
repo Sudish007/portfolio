@@ -31,11 +31,13 @@ export async function isOwner(req) {
 
 /* ---------- site config: live blob, else committed defaults ---------- */
 export async function getConfig() {
+  const defaults = globalThis.SK_CONFIG || {};
   try {
     const live = await store('sk-site').get('config', { type: 'json' });
-    if (live?.github && live?.liveProjects) return live;
+    // Live config wins, but sections it doesn't know about yet (added in code later) fall back to the committed defaults.
+    if (live?.github && live?.liveProjects) return { ...defaults, ...live };
   } catch { /* fall through */ }
-  return globalThis.SK_CONFIG || {};
+  return defaults;
 }
 
 /* ---------- crypto ---------- */

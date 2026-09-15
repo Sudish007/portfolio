@@ -549,7 +549,8 @@ async function loadRemoteConfig() {
     clearTimeout(t);
     if (!r.ok) return;                       // static hosting / API down -> keep committed defaults
     const j = await r.json();
-    if (j?.config?.github && j?.config?.liveProjects) CFG = j.config;
+    // Live config wins, but sections it doesn't know about yet (added in code later) fall back to the committed defaults.
+    if (j?.config?.github && j?.config?.liveProjects) CFG = { ...(window.SK_CONFIG || {}), ...j.config };
   } catch { /* offline or timeout -> defaults */ }
 }
 
