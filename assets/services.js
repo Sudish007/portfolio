@@ -32,12 +32,17 @@ const toastEl = $('#toast'); let toastT = 0;
 const toast = m => { if (!toastEl) return; toastEl.textContent = m; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 2600); };
 
 /* ---------- config ---------- */
-let CFG = globalThis.SK_CONFIG || {};
+const DEFAULTS = globalThis.SK_CONFIG || {};
+let CFG = DEFAULTS;
 async function loadConfig() {
   try {
     const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 2500);
     const r = await fetch('/api/config', { signal: ctl.signal, cache: 'no-store' }); clearTimeout(t);
-    if (r.ok) { const j = await r.json(); if (j?.config?.github && j?.config?.liveProjects) CFG = j.config; }
+    if (r.ok) {
+      const j = await r.json();
+      // Live config wins, but sections it doesn't know about yet (added in code later) fall back to the committed defaults.
+      if (j?.config?.github && j?.config?.liveProjects) CFG = { ...DEFAULTS, ...j.config };
+    }
   } catch { /* defaults */ }
 }
 

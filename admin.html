@@ -498,15 +498,16 @@ async function ghWhoAmI(token) {
 }
 // Live config: what the site actually serves. Falls back to the committed defaults file.
 async function apiLoadConfig() {
+  const defaults = parseConfigJs(await (await fetch('assets/config.js', { cache: 'no-store' })).text());
   try {
     const r = await fetch('/api/config', { cache: 'no-store' });
     if (r.ok) {
       const j = await r.json();
-      if (j?.config?.github && j?.config?.liveProjects) return { cfg: j.config, source: 'live' };
+      // Live config wins; sections it doesn't have yet (added in code later) start from the committed defaults.
+      if (j?.config?.github && j?.config?.liveProjects) return { cfg: { ...defaults, ...j.config }, source: 'live' };
     }
   } catch { /* API unreachable (e.g. plain static hosting) */ }
-  const r = await fetch('assets/config.js', { cache: 'no-store' });
-  return { cfg: parseConfigJs(await r.text()), source: 'defaults' };
+  return { cfg: defaults, source: 'defaults' };
 }
 async function apiSaveConfig(cfg) {
   const r = await fetch('/api/config', {
