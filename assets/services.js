@@ -157,26 +157,31 @@ $('#buyForm').addEventListener('submit', async e => {
 
   if (!(await ensureRazorpay())) { reset(); err.textContent = 'Razorpay checkout is blocked in this browser (ad blocker?). Book on WhatsApp instead.'; $('#buyFallback').hidden = false; return; }
 
+  // A modal <dialog> lives in the browser's top layer, which would sit ABOVE Razorpay's iframe.
+  // Close ours while Razorpay is open; bring it back (with the typed details intact) on cancel/failure.
+  const reopen = () => { reset(); if (!buyDlg.open) buyDlg.showModal(); };
+  buyDlg.close();
+
   const rzp = new window.Razorpay({
     key: order.keyId, amount: order.amount, currency: order.currency, order_id: order.orderId,
     name: 'Sudish Kumar', description: order.description, image: location.origin + '/profile.jpg',
     prefill: order.prefill, notes: { serviceId: it.id }, theme: { color: '#06b6d4' },
-    modal: { ondismiss: () => { reset(); toast('Payment cancelled — nothing was charged.'); } },
+    modal: { ondismiss: () => { reopen(); toast('Payment cancelled — nothing was charged.'); } },
     handler: async resp => {
-      btn.textContent = 'Verifying payment…';
       try {
+        toast('Verifying payment…');
         const v = await fetch('/api/rzp/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ orderId: resp.razorpay_order_id, paymentId: resp.razorpay_payment_id, signature: resp.razorpay_signature }) });
         const j = await v.json().catch(() => ({}));
         if (!v.ok || !j.ok) throw new Error(j.error || `HTTP ${v.status}`);
-        buyDlg.close(); reset(); $('#buyForm').reset(); showDone(j);
+        reset(); $('#buyForm').reset(); showDone(j);
       } catch (ex) {
-        reset();
+        reopen();
         err.textContent = `Payment went through (ID ${resp.razorpay_payment_id}) but confirmation failed: ${ex.message}. Don't pay again — email me this ID and I'll confirm manually.`;
       }
     }
   });
-  rzp.on?.('payment.failed', r => { reset(); err.textContent = `Payment failed: ${r?.error?.description || 'declined'}. Nothing was charged — try another method.`; });
+  rzp.on?.('payment.failed', r => { reopen(); err.textContent = `Payment failed: ${r?.error?.description || 'declined'}. Nothing was charged — try another method.`; });
   rzp.open();
 });
 
