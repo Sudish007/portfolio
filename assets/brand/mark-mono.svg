@@ -1,11 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="256" height="256" role="img" aria-label="&lt;SK /&gt; mark, single colour">
-  <!-- Single-colour version for print, embroidery, watermarks. Uses currentColor: set `color` on the element or parent. -->
-  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M17 36L8 50L17 64"/><path d="M66.5 68.5L76.5 31.5"/><path d="M83 36L92 50L83 64"/>
+  <!-- Single-colour version (print, watermark, embroidery). Uses currentColor: set `color` on the element or parent. -->
+  <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" opacity=".55">
+    <path d="M21.5 41L12.5 50L21.5 59"/><path d="M78.5 41L87.5 50L78.5 59"/><path d="M63.5 64L71.5 36"/>
   </g>
-  <g fill="none" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M40 36C38 28.5 23.5 29 23.5 38.5C23.5 48 40 46 40 56C40 66 25.5 67.5 22 60"/>
-    <path d="M47.5 31V69M47.5 50L60.5 32M47.5 50L61.5 69"/>
+  <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M39.5 36.5H27.5V50H39.5V63.5H27.5"/>
+    <path d="M46.5 36V64M46.5 50L57.5 36M46.5 50L57.5 64"/>
   </g>
-  <g fill="currentColor"><circle cx="40" cy="36" r="4.8"/><circle cx="22" cy="60" r="4.8"/><circle cx="47.5" cy="31" r="4.8"/><circle cx="47.5" cy="69" r="4.8"/><circle cx="60.5" cy="32" r="4.8"/><circle cx="61.5" cy="69" r="4.8"/><circle cx="47.5" cy="50" r="6.2"/></g>
 </svg>
