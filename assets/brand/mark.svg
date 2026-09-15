@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512" role="img" aria-label="Sudish Kumar — SK synapse mark">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512" role="img" aria-label="Sudish Kumar — &lt;SK /&gt; mark">
   <defs>
-    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="14" y1="18" x2="90" y2="84">
+    <linearGradient id="g" gradientUnits="userSpaceOnUse" x1="6" y1="50" x2="94" y2="50">
       <stop offset="0" stop-color="#22d3ee"/>
-      <stop offset=".55" stop-color="#8b5cf6"/>
+      <stop offset=".52" stop-color="#8b5cf6"/>
       <stop offset="1" stop-color="#f59e0b"/>
     </linearGradient>
     <radialGradient id="bg" cx=".28" cy=".18" r="1.1">
@@ -13,26 +13,30 @@
       <path d="M10 0H0V10" fill="none" stroke="#ffffff" stroke-opacity=".055" stroke-width=".6"/>
     </pattern>
     <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="3.2" result="b"/>
+      <feGaussianBlur stdDeviation="2.8" result="b"/>
       <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
   </defs>
   <rect width="100" height="100" rx="24" fill="url(#bg)"/>
   <rect width="100" height="100" rx="24" fill="url(#grid)"/>
-  <!-- orbit: trajectory / time -->
-  <circle cx="50" cy="50" r="41.5" fill="none" stroke="url(#g)" stroke-opacity=".38" stroke-width=".9" stroke-dasharray="1.6 4.2"/>
-  <!-- letterforms as circuit traces -->
-  <g fill="none" stroke="url(#g)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
-    <path d="M45 31C40 22 20 24 21 37C22 49 46 46 45 60C44 73 23 74 18 65"/>
-    <path d="M61 26V74M61 50L83 27M61 50L85 74"/>
+  <!-- code tag: < ... /> as light traces -->
+  <g fill="none" stroke="url(#g)" stroke-width="4.6" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".9">
+    <path d="M17 36L8 50L17 64"/>
+    <path d="M66.5 68.5L76.5 31.5"/>
+    <path d="M83 36L92 50L83 64"/>
   </g>
-  <!-- nodes -->
+  <!-- S K as bold circuit traces -->
+  <g fill="none" stroke="url(#g)" stroke-width="6.4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+    <path d="M40 36C38 28.5 23.5 29 23.5 38.5C23.5 48 40 46 40 56C40 66 25.5 67.5 22 60"/>
+    <path d="M47.5 31V69M47.5 50L60.5 32M47.5 50L61.5 69"/>
+  </g>
+  <!-- node terminals -->
   <g fill="url(#g)">
-    <circle cx="45" cy="31" r="5.2"/><circle cx="18" cy="65" r="5.2"/>
-    <circle cx="61" cy="26" r="5.2"/><circle cx="61" cy="74" r="5.2"/><circle cx="83" cy="27" r="5.2"/><circle cx="85" cy="74" r="5.2"/>
+    <circle cx="40" cy="36" r="4.3"/><circle cx="22" cy="60" r="4.3"/>
+    <circle cx="47.5" cy="31" r="4.3"/><circle cx="47.5" cy="69" r="4.3"/><circle cx="60.5" cy="32" r="4.3"/><circle cx="61.5" cy="69" r="4.3"/>
   </g>
-  <!-- the spark: one warm, human point in the graph -->
-  <circle cx="61" cy="50" r="9" fill="#f59e0b" fill-opacity=".28"/>
-  <circle cx="61" cy="50" r="6.4" fill="#f59e0b"/>
-  <circle cx="61" cy="50" r="2.9" fill="#fff7ed"/>
+  <!-- the spark -->
+  <circle cx="47.5" cy="50" r="7.5" fill="#f59e0b" fill-opacity=".28"/>
+  <circle cx="47.5" cy="50" r="5.3" fill="#f59e0b"/>
+  <circle cx="47.5" cy="50" r="2.4" fill="#fff7ed"/>
 </svg>
