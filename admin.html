@@ -114,6 +114,7 @@
       <div class="btnrow">
         <label class="check"><input type="checkbox" id="liveEnabled"> Show “Live Projects” section</label>
         <label class="check"><input type="checkbox" id="ghEnabled"> Show “Live from GitHub” section</label>
+        <label class="check"><input type="checkbox" id="svcEnabled"> Sell services (/services page + links)</label>
       </div>
     </div>
 
@@ -143,6 +144,34 @@
       <label style="margin-top:12px"><span>Intro line</span><textarea id="lpLede" rows="2"></textarea></label>
       <div id="items"></div>
       <div class="btnrow"><button class="mini" id="addItem" style="padding:9px 16px">＋ Add project</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>💼 Services & pricing <span class="hint">— what /services sells. Prices in whole ₹; the server charges exactly this amount.</span></h2>
+      <div class="frow">
+        <label><span>Eyebrow</span><input type="text" id="svcEyebrow"></label>
+        <label><span>Title</span><input type="text" id="svcTitle"></label>
+        <label><span>Booking link <span class="hint">(Cal.com / Calendly; sent after payment for session services)</span></span><input type="text" id="svcBooking" placeholder="https://cal.com/yourname/60min"></label>
+      </div>
+      <label style="margin-top:12px"><span>Intro line</span><textarea id="svcLede" rows="2"></textarea></label>
+      <label style="margin-top:12px"><span>Groups <span class="hint">(one per line: <code>id | Title | blurb</code>)</span></span><textarea id="svcGroups" rows="3" spellcheck="false"></textarea></label>
+      <div id="svcItems"></div>
+      <div class="btnrow"><button class="mini" id="addSvc" type="button" style="padding:9px 16px">＋ Add service</button></div>
+      <div id="productsBox" hidden>
+        <h3 style="font-size:.85rem;margin-top:18px">📎 Digital product files</h3>
+        <p class="hint" style="font-size:.76rem;color:var(--muted)">Upload the file buyers receive for each <b>digital</b> service (max 4.5 MB). Un-hide the service once its file is here.</p>
+        <div id="productsList"></div>
+      </div>
+    </div>
+
+    <div class="panel" id="ordersPanel" hidden>
+      <h2>🧾 Orders <span class="hint" id="ordersCount"></span></h2>
+      <div class="btnrow">
+        <button class="mini" id="ordersRefresh" type="button">↻ Refresh</button>
+        <label class="check"><input type="checkbox" id="ordersPaidOnly" checked> Paid only</label>
+        <span class="hint" id="ordersTotals" style="margin-left:auto"></span>
+      </div>
+      <div id="ordersList"></div>
     </div>
 
     <div class="panel" id="inboxPanel" hidden>
@@ -191,12 +220,12 @@ const HEADER = `/* =============================================================
    ===================================================================== */
 `;
 function parseConfigJs(src) {
-  const w = {};
-  new Function('window', src + '\n;return window;')(w);
-  if (!w.SK_CONFIG || typeof w.SK_CONFIG !== 'object') throw new Error('window.SK_CONFIG not found in file');
+  const w = {};                                             // sandbox: both `globalThis` and legacy `window` resolve to this object
+  new Function('globalThis', 'window', src + '\n;return globalThis;')(w, w);
+  if (!w.SK_CONFIG || typeof w.SK_CONFIG !== 'object') throw new Error('SK_CONFIG not found in file');
   return w.SK_CONFIG;
 }
-const serializeConfig = cfg => HEADER + 'window.SK_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
+const serializeConfig = cfg => HEADER + 'globalThis.SK_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
 
 function msg(el, kind, text) { el.className = 'msg ' + kind; el.textContent = text; if (kind === 'ok') setTimeout(() => { if (el.textContent === text) el.className = 'msg'; }, 6000); }
 
@@ -216,7 +245,15 @@ function fillForm() {
   $('#lpEyebrow').value = l.eyebrow || '';
   $('#lpTitle').value = l.title || '';
   $('#lpLede').value = l.lede || '';
+  const s = c.services ||= { enabled: true, groups: [], items: [] };
+  $('#svcEnabled').checked = s.enabled !== false;
+  $('#svcEyebrow').value = s.eyebrow || '';
+  $('#svcTitle').value = s.title || '';
+  $('#svcLede').value = s.lede || '';
+  $('#svcBooking').value = s.bookingUrl || '';
+  $('#svcGroups').value = (s.groups || []).map(g => [g.id, g.title, g.blurb || ''].join(' | ')).join('\n');
   renderItems();
+  renderSvcItems();
   updateOut();
 }
 function readForm() {
@@ -233,6 +270,15 @@ function readForm() {
   l.eyebrow = $('#lpEyebrow').value.trim();
   l.title = $('#lpTitle').value.trim();
   l.lede = $('#lpLede').value.trim();
+  const s = c.services ||= {};
+  s.enabled = $('#svcEnabled').checked;
+  s.eyebrow = $('#svcEyebrow').value.trim();
+  s.title = $('#svcTitle').value.trim();
+  s.lede = $('#svcLede').value.trim();
+  s.bookingUrl = $('#svcBooking').value.trim();
+  s.currency ||= 'INR';
+  s.groups = lines($('#svcGroups').value).map(row => { const [id = '', title = '', blurb = ''] = row.split('|').map(x => x.trim()); return { id, title: title || id, blurb }; }).filter(g => g.id);
+  s.items ||= [];
 }
 
 /* project items — DOM built with createElement (values never go through innerHTML) */
@@ -243,7 +289,12 @@ const FIELDS = [
 ];
 function h(tag, attrs = {}, ...kids) {
   const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(attrs)) { if (k === 'class') el.className = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v); }
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (typeof v === 'boolean') { if (v) el.setAttribute(k, ''); }       // boolean attrs (hidden, disabled): presence only
+    else el.setAttribute(k, v);
+  }
   el.append(...kids); return el;
 }
 function renderItems() {
@@ -286,6 +337,142 @@ function renderItems() {
     box.append(card);
   });
 }
+/* ---------- services editor ---------- */
+const SVC_FIELDS = [
+  ['id', 'ID (slug, used in links & as product key)', 'text'], ['name', 'Name', 'text'],
+  ['type', 'Type', 'select', ['fixed', 'digital', 'quote']], ['price', 'Price (₹, whole rupees)', 'number'],
+  ['unit', 'Unit label', 'text'], ['meta', 'Meta line (duration / turnaround)', 'text']
+];
+let products = {};                                          // id -> { filename, size, uploadedAt }
+function renderSvcItems() {
+  const box = $('#svcItems'); box.textContent = '';
+  const s = state.cfg.services ||= {}; const items = s.items ||= [];
+  const groupIds = (s.groups || []).map(g => g.id);
+  items.forEach((it, i) => {
+    const head = h('div', { class: 'item-head' },
+      h('span', { class: 'nm' }, `${it.name || 'Untitled'} — ${it.unit === 'from' ? 'from ' : ''}₹${Number(it.price || 0).toLocaleString('en-IN')}`),
+      h('span', { class: 'src-badge' }, it.type || 'fixed'),
+      h('button', { class: 'mini', type: 'button', title: 'Move up', onclick: () => { if (i > 0) { [items[i - 1], items[i]] = [items[i], items[i - 1]]; touch(); renderSvcItems(); } } }, '↑'),
+      h('button', { class: 'mini', type: 'button', title: 'Move down', onclick: () => { if (i < items.length - 1) { [items[i + 1], items[i]] = [items[i], items[i + 1]]; touch(); renderSvcItems(); } } }, '↓'),
+      (() => { const cb = h('input', { type: 'checkbox' }); cb.checked = it.hidden === true; cb.addEventListener('change', () => { if (cb.checked) it.hidden = true; else delete it.hidden; touch(); card.classList.toggle('off', !!it.hidden); }); return h('label', { class: 'check' }, cb, ' hidden'); })(),
+      (() => { const cb = h('input', { type: 'checkbox' }); cb.checked = it.booking === true; cb.addEventListener('change', () => { if (cb.checked) it.booking = true; else delete it.booking; touch(); }); return h('label', { class: 'check', title: 'Send the booking link after payment' }, cb, ' booking'); })(),
+      h('button', { class: 'mini danger', type: 'button', onclick: () => { if (confirm(`Delete "${it.name}" from services?`)) { items.splice(i, 1); touch(); renderSvcItems(); } } }, '🗑 delete'));
+    const grid = h('div', { class: 'frow' });
+    for (const [key, label, kind, opts] of SVC_FIELDS) {
+      let input;
+      if (kind === 'select') { input = h('select', {}); opts.forEach(o => input.append(h('option', { value: o }, o))); input.value = it[key] || opts[0]; }
+      else { input = h('input', { type: kind }); input.value = it[key] ?? ''; if (kind === 'number') { input.min = '1'; input.step = '1'; } }
+      input.addEventListener('input', () => {
+        const v = input.value.trim();
+        if (key === 'price') it.price = Math.max(0, parseInt(v, 10) || 0);
+        else if (key === 'id') it.id = v.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+        else if (v) it[key] = v; else delete it[key];
+        head.querySelector('.nm').textContent = `${it.name || 'Untitled'} — ${it.unit === 'from' ? 'from ' : ''}₹${Number(it.price || 0).toLocaleString('en-IN')}`;
+        head.querySelector('.src-badge').textContent = it.type || 'fixed';
+        touch();
+      });
+      grid.append(h('label', {}, h('span', {}, label), input));
+    }
+    const groupSel = h('select', {}); groupIds.forEach(g => groupSel.append(h('option', { value: g }, g)));
+    if (it.group && !groupIds.includes(it.group)) groupSel.append(h('option', { value: it.group }, it.group));
+    groupSel.value = it.group || groupIds[0] || ''; groupSel.addEventListener('change', () => { it.group = groupSel.value; touch(); });
+    grid.append(h('label', {}, h('span', {}, 'Group'), groupSel));
+    const desc = h('textarea', { rows: '2' }); desc.value = it.desc || ''; desc.addEventListener('input', () => { it.desc = desc.value.trim(); touch(); });
+    const bullets = h('textarea', { rows: '4' }); bullets.value = (it.bullets || []).join('\n'); bullets.addEventListener('input', () => { it.bullets = lines(bullets.value); touch(); });
+    const after = h('textarea', { rows: '2' }); after.value = it.after || ''; after.addEventListener('input', () => { it.after = after.value.trim(); touch(); });
+    const card = h('div', { class: 'item' + (it.hidden ? ' off' : ''), 'data-svc': it.id || '' }, head, grid,
+      h('label', { style: 'margin-top:12px' }, h('span', {}, 'Description'), desc),
+      h('label', { style: 'margin-top:12px' }, h('span', {}, "What's included (one per line)"), bullets),
+      h('label', { style: 'margin-top:12px' }, h('span', {}, 'After payment — what the buyer is told to do next'), after));
+    box.append(card);
+  });
+  renderProducts();
+}
+$('#addSvc').addEventListener('click', () => {
+  const s = state.cfg.services ||= { groups: [], items: [] };
+  s.items.push({ id: 'new-service', group: (s.groups[0] || {}).id || 'jobseekers', type: 'fixed', name: 'New service', price: 999, unit: 'one-time', meta: '', desc: '', bullets: [], after: '' });
+  touch(); renderSvcItems();
+  const cards = document.querySelectorAll('#svcItems .item'); cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* ---------- digital product files ---------- */
+function renderProducts() {
+  const box = $('#productsBox'), list = $('#productsList');
+  const digital = (state.cfg.services?.items || []).filter(i => i.type === 'digital' && i.id);
+  box.hidden = !state.token || !digital.length;
+  if (box.hidden) return;
+  list.textContent = '';
+  digital.forEach(it => {
+    const p = products[it.id];
+    const file = h('input', { type: 'file' });
+    const status = h('span', { class: 'hint' }, p ? `✓ ${p.filename} (${Math.round((p.size || 0) / 1024)} KB, ${p.uploadedAt ? new Date(p.uploadedAt).toLocaleDateString() : ''})` : '— no file yet (buyers get a "will email shortly" notice)');
+    const up = h('button', { class: 'mini', type: 'button', onclick: async () => {
+      const f = file.files?.[0]; if (!f) return msg($('#msg'), 'err', 'Choose a file first.');
+      if (f.size > 4.5 * 1024 * 1024) return msg($('#msg'), 'err', 'File too large (max 4.5 MB).');
+      up.disabled = true; up.textContent = 'Uploading…';
+      try {
+        const buf = new Uint8Array(await f.arrayBuffer()); let bin = ''; for (let i = 0; i < buf.length; i += 0x8000) bin += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+        const r = await fetch('/api/product-file', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token },
+          body: JSON.stringify({ id: it.id, filename: f.name, contentType: f.type || 'application/octet-stream', data: btoa(bin) }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.error || 'HTTP ' + r.status);
+        msg($('#msg'), 'ok', `Uploaded ${f.name} for "${it.name}".`); await loadProducts();
+      } catch (e) { msg($('#msg'), 'err', 'Upload failed: ' + e.message); }
+      up.disabled = false; up.textContent = 'Upload';
+    } }, 'Upload');
+    const del = h('button', { class: 'mini danger', type: 'button', hidden: !p, onclick: async () => {
+      if (!confirm(`Remove the file for "${it.name}"?`)) return;
+      await fetch('/api/product-file?id=' + encodeURIComponent(it.id), { method: 'DELETE', headers: { Authorization: 'Bearer ' + state.token } }); await loadProducts();
+    } }, '🗑');
+    if (!p) del.hidden = true;
+    list.append(h('div', { class: 'item' }, h('div', { class: 'item-head' }, h('span', { class: 'nm' }, `${it.name} (${it.id})`), status), h('div', { class: 'btnrow' }, file, up, del)));
+  });
+}
+async function loadProducts() {
+  if (!state.token) return;
+  try {
+    const r = await fetch('/api/product-file', { headers: { Authorization: 'Bearer ' + state.token }, cache: 'no-store' });
+    if (r.ok) { products = {}; ((await r.json()).products || []).forEach(p => { products[p.id] = p; }); }
+  } catch { /* ignore */ }
+  renderProducts();
+}
+
+/* ---------- orders ---------- */
+const inr = paise => '₹' + (paise / 100).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+async function loadOrders() {
+  const list = $('#ordersList'), count = $('#ordersCount'), totals = $('#ordersTotals');
+  try {
+    const r = await fetch('/api/orders', { headers: { Authorization: 'Bearer ' + state.token }, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const { orders, totals: t } = await r.json();
+    const paidOnly = $('#ordersPaidOnly').checked;
+    const shown = paidOnly ? orders.filter(o => o.status === 'paid') : orders;
+    count.textContent = orders.length ? `— ${shown.length} shown of ${orders.length}` : '— none yet';
+    totals.textContent = t ? `${t.paidCount} paid · ${inr(t.paidAmount)} total` : '';
+    list.textContent = '';
+    if (!shown.length) { list.append(h('p', { class: 'inbox-empty' }, paidOnly ? 'No paid orders yet.' : 'No orders yet.')); return; }
+    shown.forEach(o => {
+      const badge = h('span', { class: 'src-badge', style: o.status === 'paid' ? 'color:var(--ok);border-color:color-mix(in oklab,var(--ok) 40%,transparent)' : o.status === 'failed' ? 'color:#f87171' : '' }, o.status + (o.via ? ' · ' + o.via : ''));
+      const ful = h('input', { type: 'checkbox' }); ful.checked = !!o.fulfilled;
+      ful.addEventListener('change', async () => { await fetch('/api/orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token }, body: JSON.stringify({ id: o.id, fulfilled: ful.checked }) }); row.classList.toggle('off', ful.checked); });
+      const note = h('input', { type: 'text', placeholder: 'private note (saved on blur)' }); note.value = o.note || '';
+      note.addEventListener('blur', async () => { if (note.value !== (o.note || '')) { o.note = note.value; await fetch('/api/orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token }, body: JSON.stringify({ id: o.id, note: note.value }) }); } });
+      const resend = h('button', { class: 'mini', type: 'button', hidden: o.status !== 'paid', onclick: async () => {
+        resend.disabled = true; const r2 = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + state.token }, body: JSON.stringify({ id: o.id, action: 'resend' }) });
+        const j = await r2.json().catch(() => ({})); msg($('#msg'), j.emailed ? 'ok' : 'err', j.emailed ? 'Confirmation email re-sent.' : 'Email not sent — is BREVO_API_KEY / MAIL_FROM configured?'); resend.disabled = false;
+      } }, '✉ resend'); if (o.status !== 'paid') resend.hidden = true;
+      const row = h('div', { class: 'item inbox-it' + (o.fulfilled ? ' off' : '') },
+        h('div', { class: 'item-head' }, h('span', { class: 'nm' }, `${o.serviceName || o.serviceId} · ${inr(o.amount || 0)}`), badge, h('span', { class: 'when' }, o.createdAt ? new Date(o.createdAt).toLocaleString() : ''), h('label', { class: 'check' }, ful, ' fulfilled'), resend),
+        h('div', { class: 'inbox-contact' }, `${o.name || ''} · ${o.email || ''}${o.phone ? ' · ' + o.phone : ''}`),
+        h('div', { class: 'inbox-meta' }, [o.id, o.paymentId, o.method, o.failure?.reason ? 'failed: ' + o.failure.reason : '', o.downloads ? `${o.downloads} download(s)` : '', o.notified ? 'emailed ✓' : 'no email sent', ...(o.flags || [])].filter(Boolean).join(' · ')),
+        h('div', { style: 'margin-top:8px' }, note));
+      list.append(row);
+    });
+  } catch (e) { count.textContent = ''; list.textContent = ''; list.append(h('p', { class: 'inbox-empty' }, 'Orders unavailable: ' + e.message)); }
+}
+$('#ordersRefresh').addEventListener('click', loadOrders);
+$('#ordersPaidOnly').addEventListener('change', loadOrders);
+
 $('#addItem').addEventListener('click', () => {
   state.cfg.liveProjects.items.push({ name: 'New project', icon: '🚀', color: '#06b6d4', type: 'web', status: 'Live', tagline: '', tags: [], website: '', playStore: '', apk: '', repo: '' });
   touch(); renderItems();
@@ -371,6 +558,7 @@ function setMode(connected) {
   $('#outPanel').classList.toggle('show', !connected);
   $('#forget').hidden = !connected;
   $('#inboxPanel').hidden = !connected;
+  $('#ordersPanel').hidden = !connected;
   $('#save').textContent = connected ? 'Save live' : 'Generate file';
 }
 function unlock(connected) {
@@ -395,7 +583,7 @@ async function connect(token, silent) {
     state.cfg = cfg; state.source = source;
     state.orig = serializeConfig(state.cfg); state.dirty = false; $('#dirty').hidden = true;
     unlock(true);
-    loadInbox();
+    loadInbox(); loadOrders(); loadProducts();
     if ($('#remember').checked) try { localStorage.setItem('sk-admin-token', token); } catch {}
     if (!silent) msg($('#connMsg'), 'ok', source === 'live'
       ? 'Connected — editing the live config (served by /api/config).'
@@ -414,6 +602,12 @@ $('#save').addEventListener('click', async () => {
   readForm();
   const bad = (state.cfg.liveProjects.items || []).find(it => ['website', 'playStore', 'apk', 'repo'].some(k => it[k] && !/^https?:\/\//i.test(it[k])));
   if (bad) return msg($('#msg'), 'err', `"${bad.name}": link fields must start with http(s):// (or be empty).`);
+  const svcItems = state.cfg.services?.items || [];
+  const badSvc = svcItems.find(it => !/^[a-z0-9-]{2,60}$/.test(it.id || '') || !it.name || !Number.isInteger(it.price) || it.price < 1);
+  if (badSvc) return msg($('#msg'), 'err', `Service "${badSvc.name || badSvc.id || '?'}": needs a slug id (a-z, 0-9, dashes), a name and a whole-rupee price ≥ 1.`);
+  const dupe = svcItems.map(i => i.id).find((id, i, a) => a.indexOf(id) !== i);
+  if (dupe) return msg($('#msg'), 'err', `Two services share the id "${dupe}" — ids must be unique.`);
+  if (state.cfg.services?.bookingUrl && !/^https?:\/\//i.test(state.cfg.services.bookingUrl)) return msg($('#msg'), 'err', 'Booking link must start with http(s)://.');
   const text = serializeConfig(state.cfg);
   try { parseConfigJs(text); } catch (e) { return msg($('#msg'), 'err', 'Internal serialization error: ' + e.message); }
   if (!state.token) { updateOut(); $('#outPanel').classList.add('show'); $('#outPanel').scrollIntoView({ behavior: 'smooth' }); msg($('#msg'), 'ok', 'File generated below — copy or download it, then commit as assets/config.js (fallback defaults).'); return; }
