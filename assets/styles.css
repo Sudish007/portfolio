@@ -117,8 +117,8 @@ kbd { font-family: var(--mono); font-size: .68rem; padding: 2px 6px; border: 1px
 .logo { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; color: var(--text); display: inline-flex; align-items: center; gap: 10px; }
 .logo:hover { color: var(--text); }
 .logo-mark { position: relative; width: 28px; height: 28px; flex-shrink: 0; }
-.logo-mark img { width: 28px; height: 28px; border-radius: 8px; display: block; box-shadow: 0 4px 14px var(--glow); transition: transform .4s var(--ease); }
-.logo:hover .logo-mark img { transform: rotate(-6deg) scale(1.06); }
+.logo-mark img { width: 28px; height: 28px; border-radius: 7px; display: block; border: 1px solid var(--border); transition: border-color .25s; }
+.logo:hover .logo-mark img { border-color: var(--border-strong); }
 .logo-text b { color: var(--accent); font-weight: 700; }
 .logo .dot { position: absolute; right: -3px; bottom: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); border: 2px solid var(--bg); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); animation: ping 2.4s ease-out infinite; }
 @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); } 70% { box-shadow: 0 0 0 9px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
