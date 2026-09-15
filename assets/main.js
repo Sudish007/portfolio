@@ -57,10 +57,10 @@ function jump(el, flash) {
 
 /* ---------- config-driven sections: enable / disable ---------- */
 function applySectionToggles() {
-  for (const key of ['liveProjects', 'github']) {
+  for (const key of ['liveProjects', 'github', 'services']) {
     const on = CFG[key]?.enabled !== false;
     $$(`[data-config="${key}"]`).forEach(el => {
-      const target = el.tagName === 'A' ? el.closest('li') || el : el;
+      const target = el.tagName === 'A' && el.closest('li') ? el.closest('li') : el;
       target.toggleAttribute('hidden', !on);
     });
   }
@@ -439,6 +439,13 @@ function initPalette() {
   ].forEach(([h, i, l]) => { const el = $(h); if (el && !el.hidden) add('Go to', i, l, () => jump(el), 'section', 'go jump'); });
   $$('#projectGrid .proj').forEach(p => add('Projects', '📦', p.querySelector('h3')?.textContent || '', () => { if (p.hidden) $('.chip[data-filter="all"]')?.click(); jump(p, true); }, 'project', p.querySelector('.cat')?.textContent || ''));
   if (CFG.liveProjects?.enabled !== false) (CFG.liveProjects?.items || []).forEach(p => { const u = p.playStore || p.website || p.apk; if (p?.name && u) add('Live projects', p.icon || '🚀', p.name, () => openUrl(u), 'open ↗', p.tagline || ''); });
+  if (CFG.services?.enabled !== false) {
+    add('Services', '💼', 'All services & pricing', () => { location.href = 'services.html'; }, 'page', 'hire buy price rates');
+    (CFG.services?.items || []).filter(s => s && s.id && !s.hidden).forEach(s => {
+      const price = s.unit === 'from' ? `from ₹${Number(s.price).toLocaleString('en-IN')}` : `₹${Number(s.price).toLocaleString('en-IN')}`;
+      add('Services', s.type === 'quote' ? '📝' : '🛒', s.name, () => { location.href = `services.html?service=${encodeURIComponent(s.id)}`; }, price, `${s.meta || ''} ${s.group || ''} buy book`);
+    });
+  }
   add('Actions', '📄', 'Download resume (PDF)', () => { const a = document.createElement('a'); a.href = 'Sudish-Kumar-Resume-2026.pdf'; a.download = ''; document.body.append(a); a.click(); a.remove(); }, 'pdf', 'cv resume');
   add('Actions', '💬', 'WhatsApp Sudish', () => openUrl('https://wa.me/919870176701?text=Hi%20Sudish!'), '↗', 'chat message');
   add('Actions', '✉️', 'Email Sudish', () => { location.href = 'mailto:sudishnit@gmail.com'; }, 'mailto', 'contact');
