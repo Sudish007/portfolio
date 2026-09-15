@@ -114,8 +114,13 @@ kbd { font-family: var(--mono); font-size: .68rem; padding: 2px 6px; border: 1px
   border-bottom: 1px solid transparent; transition: border-color .3s, background .3s; }
 .nav.scrolled { border-bottom-color: var(--border); }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
-.logo { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; color: var(--accent); display: inline-flex; align-items: center; gap: 8px; }
-.logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); animation: ping 2.4s ease-out infinite; }
+.logo { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; color: var(--text); display: inline-flex; align-items: center; gap: 10px; }
+.logo:hover { color: var(--text); }
+.logo-mark { position: relative; width: 28px; height: 28px; flex-shrink: 0; }
+.logo-mark img { width: 28px; height: 28px; border-radius: 8px; display: block; box-shadow: 0 4px 14px var(--glow); transition: transform .4s var(--ease); }
+.logo:hover .logo-mark img { transform: rotate(-6deg) scale(1.06); }
+.logo-text b { color: var(--accent); font-weight: 700; }
+.logo .dot { position: absolute; right: -3px; bottom: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); border: 2px solid var(--bg); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); animation: ping 2.4s ease-out infinite; }
 @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); } 70% { box-shadow: 0 0 0 9px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .nav-links { display: flex; gap: 4px; list-style: none; align-items: center; }
 .nav-links a { display: block; padding: 8px 12px; border-radius: 10px; color: var(--text2); font-size: .84rem; font-weight: 500; position: relative; }
@@ -529,6 +534,10 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
   .nav-links a[aria-current="true"]::after { display: none; }
   .burger { display: grid; }
   .ibtn .lbl { display: none; }
+  .nav-inner { gap: 8px; }
+  .nav-ctl { gap: 6px; flex-shrink: 0; }
+  .logo { min-width: 0; }
+  .logo-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hero h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
   .tl-head { flex-direction: column; }
   section { padding: 76px 0; }
@@ -539,6 +548,9 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
   .cue { display: none; }
 }
 @media (max-width: 520px) {
+  .logo-text { display: none; }                 /* the mark alone is the logo on phones */
+  .ibtn { padding: 0 9px; }
+  .ibtn kbd { display: none; }
   .cta { flex-direction: column; align-items: stretch; }
   .stats { gap: 8px; } .stat { min-width: calc(50% - 4px); }
   .bento { grid-template-columns: repeat(2, 1fr); }
