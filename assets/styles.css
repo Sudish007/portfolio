@@ -47,8 +47,8 @@
   --text: #12131c;
   --text2: #4b5063;
   --muted: #858a9c;
-  --accent: #0891b2;
-  --accent-hi: #0e7490;
+  --accent: #0e7490;
+  --accent-hi: #155e75;
   --accent2: #7c3aed;
   --accent3: #d97706;
   --glow: color-mix(in oklab, var(--accent) 12%, transparent);
@@ -113,14 +113,12 @@ kbd { font-family: var(--mono); font-size: .68rem; padding: 2px 6px; border: 1px
   -webkit-backdrop-filter: blur(18px) saturate(160%); backdrop-filter: blur(18px) saturate(160%);
   border-bottom: 1px solid transparent; transition: border-color .3s, background .3s; }
 .nav.scrolled { border-bottom-color: var(--border); }
-.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; max-width: 1320px; }
 .logo { font-family: var(--mono); font-weight: 700; font-size: 1.05rem; color: var(--text); display: inline-flex; align-items: center; gap: 10px; }
 .logo:hover { color: var(--text); }
-.logo-mark { position: relative; width: 28px; height: 28px; flex-shrink: 0; }
-.logo-mark img { width: 28px; height: 28px; border-radius: 7px; display: block; border: 1px solid var(--border); transition: border-color .25s; }
-.logo:hover .logo-mark img { border-color: var(--border-strong); }
+.logo-mark { width: 28px; height: 28px; flex-shrink: 0; }
+.logo-mark img { width: 28px; height: 28px; border-radius: 6px; display: block; }
 .logo-text b { color: var(--accent); font-weight: 700; }
-.logo .dot { position: absolute; right: -3px; bottom: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ok); border: 2px solid var(--bg); box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); animation: ping 2.4s ease-out infinite; }
 @keyframes ping { 0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ok) 60%, transparent); } 70% { box-shadow: 0 0 0 9px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 .nav-links { display: flex; gap: 4px; list-style: none; align-items: center; }
 .nav-links a { display: block; padding: 8px 12px; border-radius: 10px; color: var(--text2); font-size: .84rem; font-weight: 500; position: relative; }
@@ -527,8 +525,9 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
 ::view-transition-new(root) { z-index: 2; }
 
 /* ---------- responsive ---------- */
-@media (max-width: 900px) {
-  .nav-links { position: absolute; top: 64px; left: 0; right: 0; display: none; flex-direction: column; align-items: stretch; gap: 2px; padding: 12px 16px 16px;
+/* Nav collapses before its links and controls compete for space. Content remains in desktop layout until 900px. */
+@media (max-width: 1220px) {
+  .nav-links { display: none; position: absolute; top: 64px; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 2px; padding: 12px 16px 16px;
     background: var(--bg2); border-bottom: 1px solid var(--border); box-shadow: var(--shadow); }
   .nav-links.open { display: flex; }
   .nav-links a[aria-current="true"]::after { display: none; }
@@ -538,6 +537,9 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
   .nav-ctl { gap: 6px; flex-shrink: 0; }
   .logo { min-width: 0; }
   .logo-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+@media (max-width: 900px) {
   .hero h1 { font-size: clamp(2.4rem, 11vw, 3.6rem); }
   .tl-head { flex-direction: column; }
   section { padding: 76px 0; }
