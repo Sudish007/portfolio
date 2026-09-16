@@ -1,9 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="title desc">
-  <title id="title">Sudish dot mark</title>
-  <desc id="desc">A lowercase s followed by a cyan period</desc>
+  <title id="title">Sudish self-closing signature</title>
+  <desc id="desc">A custom less-than, lowercase s, cyan slash, and greater-than mark</desc>
   <rect width="100" height="100" rx="22" fill="#f5f5f2"/>
   <rect x="0.5" y="0.5" width="99" height="99" rx="21.5" fill="none" stroke="#101218" stroke-opacity=".11"/>
-  <!-- Outlined from Segoe UI Semibold; no runtime font dependency. -->
-  <path d="M87 32V247Q217 148 374 148Q584 148 584 272Q584 307 566 331.5Q548 356 517.5 375Q487 394 445.5 409Q404 424 353 443Q290 468 239.5 496Q189 524 155.5 559.5Q122 595 105 640Q88 685 88 745Q88 819 123 875.5Q158 932 217 970.5Q276 1009 351 1028.5Q426 1048 506 1048Q648 1048 760 1005V802Q652 876 512 876Q468 876 432.5 867Q397 858 372 842Q347 826 333 803.5Q319 781 319 754Q319 721 333 698Q347 675 374.5 657.5Q402 640 440.5 625.5Q479 611 529 594Q595 567 647.5 539Q700 511 737 475.5Q774 440 794 393.5Q814 347 814 283Q814 205 778 147Q742 89 682 51Q622 13 543.5 -5.5Q465 -24 378 -24Q210 -24 87 32Z" transform="translate(13.45 76.76) scale(.0522388 -.0522388)" fill="#101218"/>
-  <circle cx="72" cy="68" r="7" fill="#06b6d4"/>
+  <!-- Tag brackets: squared terminals for a precise code-signature silhouette. -->
+  <g fill="none" stroke="#101218" stroke-width="5" stroke-linecap="butt" stroke-linejoin="miter">
+    <path d="M20 36.5L9 50L20 63.5"/>
+    <path d="M80 36.5L91 50L80 63.5"/>
+  </g>
+  <!-- Lowercase s outlined from Segoe UI Semibold; no runtime font dependency. -->
+  <path d="M87 32V247Q217 148 374 148Q584 148 584 272Q584 307 566 331.5Q548 356 517.5 375Q487 394 445.5 409Q404 424 353 443Q290 468 239.5 496Q189 524 155.5 559.5Q122 595 105 640Q88 685 88 745Q88 819 123 875.5Q158 932 217 970.5Q276 1009 351 1028.5Q426 1048 506 1048Q648 1048 760 1005V802Q652 876 512 876Q468 876 432.5 867Q397 858 372 842Q347 826 333 803.5Q319 781 319 754Q319 721 333 698Q347 675 374.5 657.5Q402 640 440.5 625.5Q479 611 529 594Q595 567 647.5 539Q700 511 737 475.5Q774 440 794 393.5Q814 347 814 283Q814 205 778 147Q742 89 682 51Q622 13 543.5 -5.5Q465 -24 378 -24Q210 -24 87 32Z" transform="translate(28.24 66.23) scale(.0317164 -.0317164)" fill="#101218"/>
+  <!-- The slash is the only accent: syntax, execution and closure. -->
+  <path d="M60.5 67L72 33" fill="none" stroke="#06b6d4" stroke-width="5.5" stroke-linecap="butt"/>
 </svg>
