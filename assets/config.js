@@ -23,7 +23,7 @@
 globalThis.SK_CONFIG = {
 
   github: {
-    enabled: true,
+    enabled: false,                    // "Shipping in Public" section hidden per owner request (flip to true to restore)
     user: 'Sudish007',
     maxRepos: 6,                       // how many repo cards to show
     hideForks: true,                   // e.g. the is-a.dev "register" fork
