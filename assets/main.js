@@ -108,13 +108,6 @@ async function github() {
   const c = CFG.github, reposEl = $('#repos'), statsEl = $('#ghStats');
   if (!c || c.enabled === false || !reposEl) return;
   const user = c.user || 'Sudish007', KEY = 'sk-gh-' + user, ttl = (c.cacheMinutes ?? 60) * 60e3;
-  const featured = (CFG.shipping?.featuredSites || []).filter(s => s?.name && /^https?:\/\//i.test(s.url || ''));
-  const featuredHtml = featured.map(s =>
-    `<a class="card repo featured-site" data-featured-site="${esc(s.domain || s.name)}" href="${esc(s.url)}" target="_blank" rel="noopener">
-<div class="rn"><svg aria-hidden="true"><use href="#i-globe"/></svg>${esc(s.name)}<span class="ship-badge">${esc(s.status || 'LIVE PRODUCT')}</span></div>
-<div class="rd">${esc(s.description || '')}</div>
-<div class="rm featured-meta">${(s.tags || []).map(t => `<span>${esc(t)}</span>`).join('')}<span class="site-domain">${esc(s.domain || s.url)} ↗</span></div></a>`
-  ).join('');
 
   let data = null;
   try { const cached = JSON.parse(localStorage.getItem(KEY) || 'null'); if (cached && cached.v === 2 && Date.now() - cached.t < ttl) data = cached.d; } catch { /* ignore */ }
@@ -133,7 +126,7 @@ async function github() {
       };
       try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), v: 2, d: data })); } catch { /* quota */ }
     } catch {
-      reposEl.innerHTML = featuredHtml + `<p class="empty">GitHub's anonymous API limit is busy right now — <a href="https://github.com/${esc(user)}" target="_blank" rel="noopener">open the profile directly →</a></p>`;
+      reposEl.innerHTML = `<p class="empty">GitHub's anonymous API limit is busy right now — <a href="https://github.com/${esc(user)}" target="_blank" rel="noopener">open the profile directly →</a></p>`;
       reposEl.removeAttribute('aria-busy');
       return;
     }
@@ -156,13 +149,12 @@ async function github() {
     (data.user.followers > 4 ? `<span class="gh-stat"><b>${data.user.followers}</b> followers</span>` : '') +
     (latest ? `<span class="gh-stat">last push <b>${esc(rel(latest.pushed))}</b></span>` : '');
 
-  const repoHtml = repos.map(r =>
+  reposEl.innerHTML = repos.map(r =>
     `<a class="card repo" href="${esc(r.url)}" target="_blank" rel="noopener">
 <div class="rn"><svg fill="currentColor" aria-hidden="true"><use href="#i-gh"/></svg>${esc(r.name)}</div>
 <div class="rd">${esc(r.desc || 'No description yet.')}</div>
 <div class="rm">${r.lang ? `<span><i style="--lang:${LANG_COLORS[r.lang] || 'var(--muted)'}"></i>${esc(r.lang)}</span>` : ''}${r.stars ? `<span>★ ${r.stars}</span>` : ''}<span>pushed ${esc(rel(r.pushed))}</span></div></a>`
-  ).join('');
-  reposEl.innerHTML = (featuredHtml + repoHtml) || '<p class="empty">Nothing to show — loosen <code>hideRepos</code> in config.js.</p>';
+  ).join('') || '<p class="empty">Nothing to show — loosen <code>hideRepos</code> in config.js.</p>';
   reposEl.removeAttribute('aria-busy');
 
   const pf = data.repos.find(r => r.name.toLowerCase() === 'portfolio'), up = $('#updated');
