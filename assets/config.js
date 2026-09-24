@@ -13,6 +13,8 @@
      URL (GitHub Releases asset works well).
    • Private GitHub repos never show up (the public API can't see them);
      `hideRepos` is for PUBLIC repos you don't want featured.
+   • `shipping.featuredSites[]` renders live websites before the GitHub
+     repository feed in the “Shipping in Public” section.
    • `services.items[].price` is in whole rupees and is the price the
      SERVER charges (the browser never decides the amount). `type`:
      'fixed' = pay online now, 'digital' = pay + instant download (upload
@@ -21,6 +23,19 @@
    functions, hence `globalThis` rather than `window`.
    ===================================================================== */
 globalThis.SK_CONFIG = {
+
+  shipping: {
+    featuredSites: [
+      {
+        name: 'RishtaPatra.com',
+        url: 'https://rishtapatra.com/',
+        domain: 'rishtapatra.com',
+        status: 'LIVE PRODUCT',
+        description: 'Private, no-login marriage biodata maker with 12 Indian languages, on-device imports, privacy controls, and HD PDF/PNG export.',
+        tags: ['12 languages', 'On-device privacy', 'PDF / PNG']
+      }
+    ]
+  },
 
   github: {
     enabled: true,
