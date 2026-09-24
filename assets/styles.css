@@ -334,8 +334,15 @@ section { padding: 108px 0; position: relative; }
 .repo .rn { font-family: var(--mono); font-size: .86rem; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 8px; }
 .repo .rn svg { width: 14px; height: 14px; flex-shrink: 0; }
 .repo .rd { font-size: .8rem; color: var(--text2); margin: 8px 0 12px; min-height: 2.6em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.repo .rm { display: flex; gap: 14px; font-family: var(--mono); font-size: .68rem; color: var(--muted); }
+.repo .rm { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: .68rem; color: var(--muted); }
 .repo .rm i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; background: var(--lang, var(--muted)); }
+.repo.featured-site { border-color: color-mix(in oklab, var(--accent) 32%, var(--border)); background: color-mix(in oklab, var(--accent) 4%, var(--card)); }
+.repo.featured-site .rn { color: var(--text); }
+.repo.featured-site .rn svg { color: var(--accent); }
+.repo.featured-site .rd { -webkit-line-clamp: 3; }
+.ship-badge { margin-left: auto; padding: 3px 7px; border-radius: 999px; border: 1px solid color-mix(in oklab, var(--ok) 35%, transparent); color: var(--ok); font-family: var(--mono); font-size: .58rem; letter-spacing: .08em; }
+.featured-meta span { padding: 2px 0; }
+.featured-meta .site-domain { margin-left: auto; color: var(--accent); }
 .skel { position: relative; overflow: hidden; background: var(--card); border: 1px solid var(--border); border-radius: var(--r); height: 118px; }
 .skel::after { content: ''; position: absolute; inset: 0; transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--text) 6%, transparent), transparent); animation: shimmer 1.4s infinite; }
