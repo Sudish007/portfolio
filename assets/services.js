@@ -11,10 +11,10 @@ const WA = 'https://wa.me/919870176701?text=';
 const inr = n => '₹' + Number(n).toLocaleString('en-IN', { maximumFractionDigits: 0 });
 
 /* ---------- theme / nav (shared behaviour with the main page) ---------- */
-const themeBtn = $('#themeBtn'), themeIcon = $('#themeIcon');
-const curTheme = () => document.documentElement.getAttribute('data-theme') || 'dark';
-const applyTheme = t => { document.documentElement.setAttribute('data-theme', t); try { localStorage.setItem('sk-theme', t); } catch {} if (themeIcon) themeIcon.textContent = t === 'dark' ? '🌙' : '☀️'; };
-applyTheme(curTheme());
+// assets/theme.js already applied the right theme before first paint; the toggle records an explicit choice.
+const themeBtn = $('#themeBtn');
+const curTheme = () => (window.SKTheme ? SKTheme.current() : document.documentElement.getAttribute('data-theme') || 'dark');
+const applyTheme = t => window.SKTheme ? SKTheme.choose(t) : document.documentElement.setAttribute('data-theme', t);
 themeBtn?.addEventListener('click', e => {
   const next = curTheme() === 'dark' ? 'light' : 'dark';
   if (!document.startViewTransition || reduced.matches) return applyTheme(next);

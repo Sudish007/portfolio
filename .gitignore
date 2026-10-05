@@ -6,3 +6,4 @@ _*.py
 _*.ps1
 _*.mjs
 node_modules/
+_*.env

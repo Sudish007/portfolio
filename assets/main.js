@@ -162,16 +162,18 @@ async function github() {
 }
 
 /* ---------- theme (with circular view-transition reveal) ---------- */
+// assets/theme.js applied the theme before first paint (saved choice > page default > IST clock).
+// The toggle records an EXPLICIT choice via SKTheme.choose, which stops the clock-following.
 const themeBtn = $('#themeBtn'), themeIcon = $('#themeIcon');
-const curTheme = () => document.documentElement.getAttribute('data-theme') || 'dark';
+const curTheme = () => (window.SKTheme ? SKTheme.current() : document.documentElement.getAttribute('data-theme') || 'dark');
 function applyTheme(t) {
+  if (window.SKTheme) { SKTheme.choose(t); return; }
   document.documentElement.setAttribute('data-theme', t);
-  try { localStorage.setItem('sk-theme', t); } catch { /* private mode */ }
   if (themeIcon) themeIcon.textContent = t === 'dark' ? '🌙' : '☀️';
   $$('meta[name="theme-color"]').forEach(m => m.setAttribute('content', t === 'dark' ? '#07070d' : '#f6f7fb'));
 }
 function initTheme() {
-  applyTheme(curTheme());
+  if (themeIcon) themeIcon.textContent = curTheme() === 'dark' ? '🌙' : '☀️';
   themeBtn?.addEventListener('click', e => {
     const next = curTheme() === 'dark' ? 'light' : 'dark';
     if (!document.startViewTransition || reduced.matches) return applyTheme(next);
@@ -314,7 +316,9 @@ function initNeural() {
     if (!inView || !pageVisible) { last = ts; return; }
     const dt = Math.min(32, ts - last || 16) / 16; last = ts;
     ctx.clearRect(0, 0, W, H);
-    const L = isLight(), col = L ? '8,145,178' : '6,182,212';
+    // Light mode needs a darker ink and roughly double the alpha: the dark-mode cyan at .09–.14 is invisible on #f6f7fb.
+    const L = isLight(), col = L ? '14,116,144' : '6,182,212', nodeCol = L ? '79,70,229' : '6,182,212';
+    const linkA = L ? .22 : .14, nodeA = L ? .62 : .55, hoverA = L ? .42 : .28;
     for (const n of nodes) {
       n.x += n.vx * dt; n.y += n.vy * dt;
       if (n.x < 0 || n.x > W) n.vx *= -1; if (n.y < 0 || n.y > H) n.vy *= -1;
@@ -324,25 +328,26 @@ function initNeural() {
       }
       const sp = Math.hypot(n.vx, n.vy); if (sp > .9) { n.vx *= .9 / sp; n.vy *= .9 / sp; }
     }
-    ctx.lineWidth = .6;
+    ctx.lineWidth = L ? .9 : .6;
     for (let i = 0; i < nodes.length; i++) {
       const a = nodes[i];
       for (let j = i + 1; j < nodes.length; j++) {
         const b = nodes[j], dx = a.x - b.x, dy = a.y - b.y, d2 = dx * dx + dy * dy;
         if (d2 >= LINK2) continue;
-        let al = (1 - Math.sqrt(d2) / LINK) * (L ? .09 : .14);
-        if (ptr.active) { const pd = Math.hypot((a.x + b.x) / 2 - ptr.x, (a.y + b.y) / 2 - ptr.y); if (pd < REACH) al += (1 - pd / REACH) * .28; }
+        let al = (1 - Math.sqrt(d2) / LINK) * linkA;
+        if (ptr.active) { const pd = Math.hypot((a.x + b.x) / 2 - ptr.x, (a.y + b.y) / 2 - ptr.y); if (pd < REACH) al += (1 - pd / REACH) * hoverA; }
         ctx.strokeStyle = `rgba(${col},${al})`; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
       }
     }
-    ctx.fillStyle = `rgba(${col},${L ? .35 : .55})`;
-    for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2); ctx.fill(); }
+    ctx.fillStyle = `rgba(${nodeCol},${nodeA})`;
+    const nr = L ? 1.25 : 1;                 // slightly larger nodes on light so they survive anti-aliasing
+    for (const n of nodes) { ctx.beginPath(); ctx.arc(n.x, n.y, n.r * nr, 0, Math.PI * 2); ctx.fill(); }
     for (let i = pulses.length - 1; i >= 0; i--) {   // signals travelling along edges
       const p = pulses[i]; p.t += p.s * dt; if (p.t >= 1) { pulses.splice(i, 1); continue; }
       const x = p.a.x + (p.b.x - p.a.x) * p.t, y = p.a.y + (p.b.y - p.a.y) * p.t;
-      const g = ctx.createRadialGradient(x, y, 0, x, y, 7);
-      g.addColorStop(0, L ? 'rgba(124,58,237,.9)' : 'rgba(167,139,250,.95)'); g.addColorStop(1, 'rgba(139,92,246,0)');
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 7, 0, Math.PI * 2); ctx.fill();
+      const pr = L ? 8 : 7, g = ctx.createRadialGradient(x, y, 0, x, y, pr);
+      g.addColorStop(0, L ? 'rgba(109,40,217,1)' : 'rgba(167,139,250,.95)'); g.addColorStop(1, L ? 'rgba(109,40,217,0)' : 'rgba(139,92,246,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, pr, 0, Math.PI * 2); ctx.fill();
     }
     if (pulses.length < 6 && Math.random() < .06) spawnPulse();
   }
@@ -454,7 +459,9 @@ function initPalette() {
   add('Actions', '🔗', 'LinkedIn profile', () => openUrl('https://linkedin.com/in/simplysudish'), '↗');
   add('Actions', '🐙', 'GitHub profile', () => openUrl('https://github.com/Sudish007'), '↗');
   if (navigator.share) add('Actions', '📤', 'Share this page', share, 'share');
+  add('Preferences', '🧭', 'Take the site tour', () => startTour(), 'guide', 'walkthrough help onboarding tour guide intro');
   add('Preferences', '🌗', 'Toggle dark / light theme', () => themeBtn?.click(), 'theme', 'dark light mode');
+  if (window.SKTheme) add('Preferences', '🕙', 'Theme: follow the clock again', () => { SKTheme.reset(); toast('Automatic theme ✓ light 10:00–18:00 IST, dark otherwise'); }, 'auto', 'theme automatic reset time ist default');
   [['en', '🇬🇧', 'English'], ['hi', '🇮🇳', 'हिन्दी (Hindi)'], ['bho', '🇮🇳', 'भोजपुरी (Bhojpuri)'], ['de', '🇩🇪', 'Deutsch'], ['fr', '🇫🇷', 'Français'], ['es', '🇪🇸', 'Español']]
     .forEach(([c, i, l]) => add('Language', i, l, () => setLang(c), c, 'language lang translate'));
   // Owner shortcuts only appear on devices where the admin token is stored (i.e. the owner's own browser).
@@ -540,6 +547,196 @@ function initContactForm() {
   });
 }
 
+/* ---------- first-visit walkthrough (spotlight tour) ---------- */
+// Nothing is in the DOM until the tour starts. A visitor sees it once (localStorage 'sk-tour' = 'done');
+// afterwards it stays one command away ("Take the site tour") or via ?tour in the URL.
+const TOUR_KEY = 'sk-tour';
+const tourSeen = () => { try { return localStorage.getItem(TOUR_KEY) === 'done'; } catch { return true; } };
+const tourMark = () => { try { localStorage.setItem(TOUR_KEY, 'done'); } catch { /* private mode */ } };
+let tourOpen = false;
+
+const touchOnly = () => matchMedia('(hover: none) and (pointer: coarse)').matches;
+const cmdkHint = () => (touchOnly() ? 'the search icon' : `${isMac ? '⌘' : 'Ctrl'} K`);
+
+function tourSteps() {
+  const vis = el => !!el && !el.hidden && el.getClientRects().length > 0;   // rendered on this viewport
+  const defs = [
+    { title: 'Welcome to sudish.dev 👋', cta: 'Start the tour →', scroll: 'top',
+      body: `A 30-second walkthrough of what this site can do: the command menu, live products in production and the fastest ways to reach me. ${touchOnly() ? 'Skip it any time.' : 'Esc skips it any time.'}` },
+    { targets: ['#cmdkBtn'], title: 'Command menu', scroll: 'top',
+      body: touchOnly()
+        ? 'Tap the search icon to jump to any section, download the resume, open my live apps or switch theme and language. Everything on this site is one search away.'
+        : `Press ${isMac ? '⌘' : 'Ctrl'} K or / anywhere. Jump to a section, download the resume, open my live apps or switch theme and language without leaving the keyboard.` },
+    { targets: ['#langBtn', '#themeBtn'], title: 'Theme & language', scroll: false,
+      body: 'The theme follows Indian working hours: light from 10:00 to 18:00 IST, dark otherwise. Tap the moon or sun to pick your own and it sticks. The globe switches language, Hindi and Bhojpuri included.' },
+    { targets: ['#liveGrid > *:first-child'], alt: ['#live .head'], anchor: '#live .head', title: 'Live products',
+      body: 'Not demos. Real apps and sites running in production for real users. Each card opens the Play Store listing, the website or the APK.' },
+    { targets: ['#hire-me .hire-btns'], anchor: '#hire-me .hire-layout', title: 'Hiring? One tap',
+      body: 'WhatsApp, a pre-filled email or LinkedIn, whichever your process prefers. Fixed-price services and freelance work live on the Services page.' },
+    { targets: ['#msgForm'], title: 'Or write to me right here', cta: 'Finish ✓',
+      body: 'This form posts to the site\u2019s own API and lands in my inbox and on my phone within seconds. Thanks for visiting, enjoy the site.' }
+  ];
+  const steps = [];
+  for (const d of defs) {
+    if (!d.targets) { steps.push({ ...d, els: [] }); continue; }
+    let els = d.targets.map(s => $(s)).filter(vis);
+    if (!els.length && d.alt) els = d.alt.map(s => $(s)).filter(vis);
+    if (els.length) steps.push({ ...d, els });                               // a missing target just drops its step
+  }
+  return steps;
+}
+
+function buildTour() {
+  const root = document.createElement('div');
+  root.className = 'tour'; root.id = 'tour'; root.hidden = true;
+  root.innerHTML = `
+    <div class="tour-dim"></div>
+    <div class="tour-ring" aria-hidden="true"></div>
+    <section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle" aria-describedby="tourBody" tabindex="-1">
+      <div class="tour-top"><span class="tour-n" id="tourN"></span><button type="button" class="tour-x" aria-label="Skip the tour" title="Skip (Esc)">✕</button></div>
+      <div class="tour-txt" aria-live="polite"><h3 id="tourTitle"></h3><p id="tourBody"></p></div>
+      <div class="tour-foot">
+        <div class="tour-dots" aria-hidden="true"></div>
+        <div class="tour-btns"><button type="button" class="btn btn-ghost tour-back">Skip</button><button type="button" class="btn btn-primary tour-next">Next →</button></div>
+      </div>
+      <p class="tour-kbd"><kbd>←</kbd><kbd>→</kbd> steps <span>·</span> <kbd>esc</kbd> skip</p>
+    </section>`;
+  document.body.append(root);
+  return root;
+}
+
+function startTour() {
+  if (tourOpen) return;
+  const steps = tourSteps();
+  if (steps.length < 2) return;                                              // nothing worth touring
+  const root = $('#tour') || buildTour();
+  const ring = $('.tour-ring', root), card = $('.tour-card', root), nTxt = $('#tourN'), title = $('#tourTitle'), body = $('#tourBody');
+  const dots = $('.tour-dots', root), back = $('.tour-back', root), next = $('.tour-next', root), x = $('.tour-x', root);
+  const prevFocus = document.activeElement;
+  const clamp = (v, a, b) => Math.min(Math.max(v, a), Math.max(a, b));
+  // Elements still waiting for their scroll-driven .reveal sit 26px lower than where they settle; `settled` removes
+  // that offset so scroll targets are computed for the final layout, while the ring itself follows the live rect.
+  const revealShift = el => {
+    let dy = 0;
+    for (let n = el; n && n !== document.body; n = n.parentElement) {
+      if (!n.classList.contains('reveal')) continue;
+      const m = getComputedStyle(n).transform.match(/matrix\(([^)]+)\)/);
+      if (m) dy += parseFloat(m[1].split(',')[5]) || 0;
+    }
+    return dy;
+  };
+  const union = (els, settled = false) => {
+    let l = 1e9, t = 1e9, r = -1e9, b = -1e9;
+    els.forEach(el => {
+      const q = el.getBoundingClientRect(), dy = settled ? revealShift(el) : 0;
+      l = Math.min(l, q.left); t = Math.min(t, q.top - dy); r = Math.max(r, q.right); b = Math.max(b, q.bottom - dy);
+    });
+    return { left: l, top: t, width: r - l, height: b - t };
+  };
+  let i = 0, raf = 0;
+  tourOpen = true;
+  $('#cmdk')?.close?.();
+  root.hidden = false;
+
+  const place = () => {
+    raf = 0;
+    const st = steps[i], vw = innerWidth, vh = innerHeight, m = 12, gap = 14, narrow = vw < 640;
+    if (!st.els.length) {                                                    // welcome: centred card over a dimmed page
+      root.dataset.mode = 'center'; card.dataset.pos = 'center';
+      card.style.left = `${Math.round((vw - card.offsetWidth) / 2)}px`;
+      card.style.top = `${Math.round(Math.max(m, (vh - card.offsetHeight) / 2))}px`;
+      return;
+    }
+    root.dataset.mode = 'spot';
+    const r = union(st.els), pad = 8;
+    const rt = { left: r.left - pad, top: r.top - pad, w: r.width + pad * 2, h: r.height + pad * 2 };
+    Object.assign(ring.style, { left: `${rt.left}px`, top: `${rt.top}px`, width: `${rt.w}px`, height: `${rt.h}px` });
+    const cw = card.offsetWidth, ch = card.offsetHeight, cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    let left, top, pos;
+    if (narrow) { pos = 'sheet'; left = m; top = vh - ch - m; }
+    else if (rt.top + rt.h + gap + ch <= vh - m) { pos = 'below'; top = rt.top + rt.h + gap; }
+    else if (rt.top - gap - ch >= m) { pos = 'above'; top = rt.top - gap - ch; }
+    else if (rt.left + rt.w + gap + cw <= vw - m) { pos = 'right'; left = rt.left + rt.w + gap; top = clamp(cy - ch / 2, m, vh - ch - m); }
+    else if (rt.left - gap - cw >= m) { pos = 'left'; left = rt.left - gap - cw; top = clamp(cy - ch / 2, m, vh - ch - m); }
+    else { pos = 'over'; top = vh - ch - m; }                                // target fills the screen: pin the card to the bottom
+    if (left === undefined) left = clamp(cx - cw / 2, m, vw - cw - m);
+    card.dataset.pos = pos;
+    card.style.left = `${Math.round(left)}px`; card.style.top = `${Math.round(top)}px`;
+    if (pos === 'below' || pos === 'above') card.style.setProperty('--ax', `${Math.round(clamp(cx - left, 22, cw - 22))}px`);
+    if (pos === 'right' || pos === 'left') card.style.setProperty('--ay', `${Math.round(clamp(cy - top, 22, ch - 22))}px`);
+  };
+  const onScroll = () => { raf ||= requestAnimationFrame(place); };
+
+  const scrollFor = st => {                                                  // returns true when the page will move
+    const behavior = reduced.matches ? 'auto' : 'smooth';
+    let want = null;
+    if (st.scroll === 'top') want = 0;
+    else if (st.scroll !== false && st.els.length) {
+      const r = union(st.els, true), vh = innerHeight, top = 84;            // 84 = fixed nav + breathing room
+      const avail = innerWidth < 640 ? vh - card.offsetHeight - 24 : vh;    // keep the bottom sheet clear on phones
+      const a = st.anchor ? $(st.anchor) : null, aTop = a ? union([a], true).top : r.top;
+      // Prefer showing the section heading above the target; fall back to centring when that would push the target off-screen.
+      want = (a && r.top + r.height - aTop + top <= avail - 12) ? aTop + scrollY - top : r.top + scrollY - Math.max(top, (avail - r.height) / 2);
+      want = Math.max(0, want);
+    }
+    if (want === null || Math.abs(want - scrollY) < 2) return false;
+    scrollTo({ top: want, behavior });
+    return true;
+  };
+
+  const show = k => {
+    i = clamp(k, 0, steps.length - 1);
+    const st = steps[i];
+    nTxt.textContent = `${i + 1} / ${steps.length}`;
+    title.textContent = st.title; body.textContent = st.body;
+    dots.innerHTML = steps.map((_, d) => `<i${d === i ? ' class="on"' : ''}></i>`).join('');
+    back.textContent = i === 0 ? 'Skip' : '← Back';
+    next.textContent = st.cta || 'Next →';
+    root.dataset.step = String(i);
+    const moving = scrollFor(st);
+    ring.classList.toggle('glide', !moving);                                 // glide between fixed targets, follow the page otherwise
+    place();
+    next.focus({ preventScroll: true });
+  };
+  const end = () => {
+    if (!tourOpen) return;
+    tourOpen = false; tourMark();
+    document.removeEventListener('keydown', onKey, true);
+    removeEventListener('scroll', onScroll); removeEventListener('resize', onScroll);
+    if (raf) cancelAnimationFrame(raf);
+    root.hidden = true;
+    prevFocus?.focus?.({ preventScroll: true });
+  };
+  const finish = () => { end(); toast(`Tour done ✓ ${cmdkHint()} opens the command menu any time.`); };
+  const goNext = () => (i >= steps.length - 1 ? finish() : show(i + 1));
+  const goBack = () => (i === 0 ? end() : show(i - 1));
+  const onKey = e => {
+    if (e.key === 'Escape') { e.preventDefault(); end(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); goNext(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); goBack(); }
+    else if (e.key === 'Tab') {                                              // keep focus inside the card
+      const f = $$('button', card), first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      else if (!card.contains(document.activeElement)) { e.preventDefault(); first.focus(); }
+    }
+    e.stopPropagation();                                                     // modal: no palette / menu shortcuts underneath
+  };
+
+  next.onclick = goNext; back.onclick = goBack; x.onclick = end;
+  document.addEventListener('keydown', onKey, true);
+  addEventListener('scroll', onScroll, { passive: true }); addEventListener('resize', onScroll);
+  show(0);
+}
+
+function initTour() {
+  const q = new URLSearchParams(location.search);
+  if (q.has('tour')) { setTimeout(startTour, 600); return; }               // explicit link always works
+  if (tourSeen() || q.has('notour')) return;
+  if (location.hash && location.hash !== '#top') return;                     // deep link: don't get in the way
+  setTimeout(() => { if (scrollY < 240 && !$('#cmdk')?.open) startTour(); }, 1400);   // already exploring? try next visit
+}
+
 /* ---------- live config from /api/config (Netlify Blobs) ---------- */
 async function loadRemoteConfig() {
   try {
@@ -573,6 +770,7 @@ loadRemoteConfig().then(() => {
   renderLive();
   initPalette();
   observeReveals();
+  initTour();
   github().then(observeReveals).catch(() => {});
 });
 })();
