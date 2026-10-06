@@ -57,7 +57,8 @@ function jump(el, flash) {
 
 /* ---------- config-driven sections: enable / disable ---------- */
 function applySectionToggles() {
-  for (const key of ['liveProjects', 'github', 'services']) {
+  // fitCheck is deliberately absent: its CTA only appears once /api/fit confirms the server has an LLM key (see initFit).
+  for (const key of ['liveProjects', 'github', 'services', 'recommendations', 'certifications']) {
     const on = CFG[key]?.enabled !== false;
     $$(`[data-config="${key}"]`).forEach(el => {
       const target = el.tagName === 'A' && el.closest('li') ? el.closest('li') : el;
@@ -96,6 +97,166 @@ function renderLive() {
 ${(p.tags || []).length ? `<div class="tech">${p.tags.map(t => `<span>${esc(t)}</span>`).join('')}</div>` : ''}
 <div class="lp-actions">${acts.join('')}</div></article>`;
   }).join('');
+}
+
+/* ---------- Availability (from config): hero pill, status chip, Hire Me facts, Book-a-call ---------- */
+const DEFAULT_PILL = 'Open to AI/ML Engineering Roles';
+const httpUrl = u => (/^https?:\/\//i.test(String(u || '')) ? String(u) : '');
+const bookingUrl = () => httpUrl(CFG.availability?.bookingUrl);
+const bookingLabel = () => CFG.availability?.bookingLabel || 'Book a 20-min intro call';
+function renderAvailability() {
+  const a = CFG.availability; if (!a) return;
+  const pill = $('#pill'), pt = $('#pillText');
+  if (pill) pill.dataset.status = ['open', 'interviewing', 'closed'].includes(a.status) ? a.status : 'open';
+  // A customised pill is shown as written in every language; the stock English pill keeps its translations.
+  if (pt && a.pill && a.pill !== DEFAULT_PILL) { pt.removeAttribute('data-i18n'); pt.textContent = a.pill; }
+  const hud = $('#hudAvail');
+  if (hud) { hud.textContent = a.available ? `Available: ${a.available}` : ''; hud.closest('span').hidden = !a.available; }
+  for (const [id, v] of [['#avRoles', a.roles], ['#avLocation', a.location], ['#avNotice', a.notice], ['#avAvailable', a.available]]) {
+    const el = $(id); if (!el) continue;
+    el.textContent = v || ''; el.parentElement.hidden = !v;
+  }
+  const url = bookingUrl(), btn = $('#bookCall'), card = $('#bookCard');
+  if (btn) { btn.hidden = !url; if (url) { btn.href = url; btn.querySelector('span').textContent = bookingLabel(); } }
+  if (card) { card.hidden = !url; if (url) { card.href = url; $('#bookCardText').textContent = bookingLabel(); } }
+}
+
+/* ---------- Recommendations (from config): hidden until it has at least one quote ---------- */
+function renderRecommendations() {
+  const c = CFG.recommendations, sec = $('#recommendations'), grid = $('#recGrid');
+  if (!sec || !grid) return;
+  const items = (c?.enabled === false ? [] : (c?.items || [])).filter(r => r && r.name && r.text && r.hidden !== true);
+  if (!items.length) { sec.hidden = true; return; }
+  sec.hidden = false;
+  if (c.eyebrow) $('#recEyebrow').textContent = c.eyebrow;
+  if (c.title) $('#recTitle').textContent = c.title;
+  $('#recLede').textContent = c.lede || '';
+  const initials = n => String(n).trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  grid.innerHTML = items.map((r, i) => {
+    const url = httpUrl(r.url), who = [r.role, r.company].filter(Boolean).join(' · ');
+    return `<figure class="card rec reveal d${(i % 5) + 1}">
+<blockquote><p>${esc(r.text)}</p></blockquote>
+<figcaption><span class="rec-av" aria-hidden="true">${httpUrl(r.avatar) ? `<img src="${esc(r.avatar)}" alt="" loading="lazy">` : esc(initials(r.name))}</span>
+<div class="rec-who"><b>${esc(r.name)}</b>${who ? `<small>${esc(who)}</small>` : ''}</div>
+${url ? `<a class="rec-in" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc(r.name)} on LinkedIn"><svg aria-hidden="true"><use href="#i-in"/></svg>LinkedIn</a>` : ''}</figcaption></figure>`;
+  }).join('');
+}
+
+/* ---------- Certifications (from config): a card with a verifyUrl is a link to the credential ---------- */
+function renderCerts() {
+  const c = CFG.certifications, sec = $('#certifications'), grid = $('#certGrid');
+  if (!sec || !grid) return;
+  const items = (c?.enabled === false ? [] : (c?.items || [])).filter(x => x && x.name && x.hidden !== true);
+  if (!items.length) { sec.hidden = true; return; }
+  grid.innerHTML = items.map((x, i) => {
+    const url = httpUrl(x.verifyUrl);
+    const inner = `<div class="ico" aria-hidden="true">${esc(x.icon || '🏅')}</div><div>${x.issuer ? `<div class="issuer">${esc(x.issuer)}</div>` : ''}<h3>${esc(x.name)}</h3><p>${esc(x.blurb || '')}</p><div class="when">${esc(x.when || '')}${url ? '<span class="verify">Verify ↗</span>' : ''}</div></div>`;
+    return url
+      ? `<a class="card cert reveal d${(i % 5) + 1}" href="${esc(url)}" target="_blank" rel="noopener" aria-label="${esc(x.name)}: verify credential">${inner}</a>`
+      : `<div class="card cert reveal d${(i % 5) + 1}">${inner}</div>`;
+  }).join('');
+}
+
+/* ---------- JD fit check (/api/fit): a recruiter pastes a job description, gets a constrained LLM report ---------- */
+let paletteAdd = null;          // set by initPalette so late features (fit check) can register commands
+let openFit = null;
+async function initFit() {
+  const cta = $('#fitCta'), dlg = $('#fitDlg'), btn = $('#fitBtn'), form = $('#fitForm');
+  if (!cta || !dlg || !btn || !form || typeof dlg.showModal !== 'function') return;
+  const c = CFG.fitCheck || {};
+  if (c.enabled === false) return;
+  try {                                                       // server decides: only offer it when an LLM key is configured
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 3000);
+    const r = await fetch('/api/fit', { signal: ctl.signal, cache: 'no-store' }); clearTimeout(t);
+    if (!r.ok || !(await r.json()).enabled) return;
+  } catch { return; }
+
+  const jd = $('#fitJd'), count = $('#fitCount'), err = $('#fitErr'), go = $('#fitGo'), out = $('#fitOut');
+  if (c.label) $('#fitLabel').textContent = c.label;
+  if (c.title) $('#fitTitle').textContent = c.title;
+  $('#fitBlurb').textContent = c.blurb || '';
+  cta.hidden = false;
+  let t0 = 0, last = null;                                    // last = { jd, company, role, report }
+
+  const open = () => { if (dlg.open) return; t0 = t0 || Date.now(); dlg.showModal(); document.body.style.overflow = 'hidden'; jd.focus(); };
+  const close = () => { if (dlg.open) dlg.close(); };
+  openFit = open;
+  dlg.addEventListener('close', () => { document.body.style.overflow = ''; });
+  dlg.addEventListener('click', e => { if (e.target === dlg) close(); });
+  $('#fitClose').addEventListener('click', close);
+  btn.addEventListener('click', open);
+  jd.addEventListener('input', () => { count.textContent = `${jd.value.length} / 8000`; err.textContent = ''; });
+
+  const li = (arr, f) => arr.map(x => `<li>${f(x)}</li>`).join('');
+  const plain = (rep, meta) => [
+    `JD fit check: ${rep.verdict.toUpperCase()} (${rep.score}/100)${meta.role || meta.company ? ` for ${[meta.role, meta.company].filter(Boolean).join(' at ')}` : ''}`,
+    rep.headline, '',
+    'Matched: ' + (rep.matched.map(m => m.skill).join(', ') || 'nothing specific'),
+    'Gaps: ' + (rep.gaps.map(g => g.skill).join(', ') || 'none flagged'),
+    'Talking points: ' + rep.talking_points.join(' | '),
+    'Ask Sudish about: ' + rep.questions.join(' | ')
+  ].join('\n');
+
+  const render = (rep, meta, cached) => {
+    last = { ...meta, report: rep };
+    out.dataset.v = rep.verdict;
+    out.innerHTML = `
+<div class="fit-head"><div class="fit-score" style="--p:${rep.score}"><span>${rep.score}</span></div>
+<div><div class="fit-verdict">${esc(rep.verdict)} match</div><div class="fit-headline">${esc(rep.headline)}</div></div>${cached ? '<span class="fit-cached">cached</span>' : ''}</div>
+<div class="fit-cols">
+<div class="fit-col"><h4>Matched</h4><ul>${li(rep.matched, m => `<b>${esc(m.skill)}</b>${m.evidence ? ` — ${esc(m.evidence)}` : ''}`) || '<li>Nothing specific matched.</li>'}</ul></div>
+<div class="fit-col gaps"><h4>Honest gaps</h4><ul>${li(rep.gaps, g => `<b>${esc(g.skill)}</b>${g.note ? ` — ${esc(g.note)}` : ''}`) || '<li>No material gaps found in the description.</li>'}</ul></div>
+<div class="fit-col talk"><h4>Talking points</h4><ul>${li(rep.talking_points, esc) || '<li>—</li>'}</ul></div>
+<div class="fit-col ask"><h4>Worth asking me</h4><ul>${li(rep.questions, esc) || '<li>—</li>'}</ul></div>
+</div>
+<div class="fit-actions">
+<button type="button" class="btn btn-primary" id="fitSendBtn">Send this report to Sudish →</button>
+${bookingUrl() ? `<a class="btn btn-ghost" href="${esc(bookingUrl())}" target="_blank" rel="noopener">📅 ${esc(bookingLabel())}</a>` : ''}
+<a class="btn btn-ghost" href="https://wa.me/919870176701?text=${encodeURIComponent(`Hi Sudish, I ran a JD fit check (${rep.verdict}, ${rep.score}/100)${meta.role ? ` for ${meta.role}` : ''}${meta.company ? ` at ${meta.company}` : ''}. Can we talk?`)}" target="_blank" rel="noopener">WhatsApp</a>
+<button type="button" class="mini" id="fitCopy">Copy as text</button>
+</div>
+<div class="fit-send" id="fitSend" hidden>
+<div class="f2"><label>Your name<input type="text" id="fitName" maxlength="100" autocomplete="name" placeholder="Priya Sharma"></label>
+<label>Email / phone / LinkedIn<input type="text" id="fitContact" maxlength="200" autocomplete="email" placeholder="priya@company.com"></label></div>
+<div class="dlg-foot"><span class="err" id="fitSendErr"></span><button type="button" class="btn btn-primary" id="fitSendGo">Send →</button></div>
+</div>`;
+    out.hidden = false;
+    out.scrollIntoView({ behavior: reduced.matches ? 'auto' : 'smooth', block: 'start' });
+    $('#fitCopy').addEventListener('click', () => copyText(plain(rep, meta)));
+    $('#fitSendBtn').addEventListener('click', () => { const s = $('#fitSend'); s.hidden = false; $('#fitSendBtn').disabled = true; $('#fitName').focus(); });
+    $('#fitSendGo').addEventListener('click', async () => {
+      const name = $('#fitName').value.trim(), contact = $('#fitContact').value.trim(), se = $('#fitSendErr'), b = $('#fitSendGo');
+      if (!name || !contact) { se.textContent = 'Name and a way to reach you, please.'; return; }
+      b.disabled = true; b.textContent = 'Sending…'; se.textContent = '';
+      const message = `${plain(rep, meta)}\n\n--- Job description ---\n${last.jd.slice(0, 3000)}`;
+      try {
+        const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, contact, message, website: $('#fitHp').value, t0 }) });
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok || !j.ok) throw new Error();
+        $('#fitSend').innerHTML = '<p class="fine ok">Sent ✓ I usually reply within a day.</p>';
+        toast('Report sent ✓');
+      } catch { se.textContent = 'Could not send right now. WhatsApp or email me instead.'; b.disabled = false; b.textContent = 'Send →'; }
+    });
+  };
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = jd.value.trim(), company = $('#fitCompany').value.trim(), role = $('#fitRole').value.trim();
+    if (text.length < 200) { err.textContent = 'Paste the full description (at least 200 characters) so the comparison means something.'; jd.focus(); return; }
+    if (last && last.jd === text && last.company === company && last.role === role) { out.hidden = false; return; }
+    go.disabled = true; go.innerHTML = '<span class="fit-busy">Reading the JD…</span>'; err.textContent = ''; out.hidden = true;
+    try {
+      const r = await fetch('/api/fit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jd: text, company, role, website: $('#fitHp').value, t0 }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 429) throw new Error('That is enough checks for this hour from your network. Email me the JD instead and I will reply personally.');
+      if (!r.ok || !j.report) throw new Error(j.error === 'disabled' ? 'The fit check is switched off right now.' : 'The model did not answer in time. Try once more, or just send me the JD.');
+      render(j.report, { jd: text, company, role }, !!j.cached);
+    } catch (ex) { err.textContent = ex.message || 'Something went wrong.'; }
+    go.disabled = false; go.textContent = 'Check fit →';
+  });
+
+  paletteAdd?.('Actions', '🧭', 'Check a job description against my profile', open, 'fit', 'jd fit match recruiter hire role');
+  if (new URLSearchParams(location.search).has('fit')) setTimeout(open, 600);
 }
 
 /* ---------- Live from GitHub (from config) ---------- */
@@ -438,10 +599,12 @@ function initPalette() {
 
   const items = [];
   const add = (g, i, l, run, h = '', k = '') => items.push({ g, i, l, run, h, k });
+  paletteAdd = add;
   [['#top', '🏠', 'Top'], ['#numbers', '📊', 'Impact — By the Numbers'], ['#skills', '🧠', 'Skills'], ['#experience', '💼', 'Experience'],
    ['#projects', '🧪', 'Projects'], ['#live', '🚀', 'Live Projects'], ['#github', '🐙', 'Live from GitHub'], ['#why-hire', '🎯', 'Why Hire Me'],
-   ['#hire-me', '🔥', 'Hire Me'], ['#certifications', '🏅', 'Certifications'], ['#awards', '🏆', 'Awards'], ['#contact', '✉️', 'Contact']
+   ['#recommendations', '💬', 'Recommendations'], ['#hire-me', '🔥', 'Hire Me'], ['#certifications', '🏅', 'Certifications'], ['#awards', '🏆', 'Awards'], ['#contact', '✉️', 'Contact']
   ].forEach(([h, i, l]) => { const el = $(h); if (el && !el.hidden) add('Go to', i, l, () => jump(el), 'section', 'go jump'); });
+  if (bookingUrl()) add('Actions', '📅', bookingLabel(), () => openUrl(bookingUrl()), '↗', 'book call meeting schedule calendar interview recruiter');
   $$('#projectGrid .proj').forEach(p => add('Projects', '📦', p.querySelector('h3')?.textContent || '', () => { if (p.hidden) $('.chip[data-filter="all"]')?.click(); jump(p, true); }, 'project', p.querySelector('.cat')?.textContent || ''));
   if (CFG.liveProjects?.enabled !== false) (CFG.liveProjects?.items || []).forEach(p => { const u = p.playStore || p.website || p.apk; if (p?.name && u) add('Live projects', p.icon || '🚀', p.name, () => openUrl(u), 'open ↗', p.tagline || ''); });
   if (CFG.services?.enabled !== false) {
@@ -767,10 +930,14 @@ initContactForm();
 // Config-driven sections render once the live config answers (or immediately on fallback).
 loadRemoteConfig().then(() => {
   applySectionToggles();
+  renderAvailability();
   renderLive();
+  renderRecommendations();
+  renderCerts();
   initPalette();
   observeReveals();
   initTour();
+  initFit();                                   // async; registers its palette command once /api/fit says it is configured
   github().then(observeReveals).catch(() => {});
 });
 })();

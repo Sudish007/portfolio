@@ -117,7 +117,45 @@
         <label class="check"><input type="checkbox" id="liveEnabled"> Show “Live Projects” section</label>
         <label class="check"><input type="checkbox" id="ghEnabled"> Show “Live from GitHub” section</label>
         <label class="check"><input type="checkbox" id="svcEnabled"> Sell services (/services page + links)</label>
+        <label class="check"><input type="checkbox" id="recEnabled"> Show “Recommendations” <span class="hint">(auto-hidden while empty)</span></label>
+        <label class="check"><input type="checkbox" id="certEnabled"> Show “Certifications”</label>
+        <label class="check"><input type="checkbox" id="fitEnabled"> JD fit check for recruiters <span class="hint">(also needs <code>FIT_API_KEY</code> in Netlify env)</span></label>
       </div>
+    </div>
+
+    <div class="panel">
+      <h2>🟢 Availability <span class="hint">— hero pill, status chip and the “Hire Me” facts</span></h2>
+      <div class="frow">
+        <label><span>Status</span><select id="avStatus"><option value="open">open (green dot)</option><option value="interviewing">interviewing (amber)</option><option value="closed">closed (grey)</option></select></label>
+        <label><span>Hero pill text</span><input type="text" id="avPill" maxlength="60" placeholder="Open to AI/ML Engineering Roles"></label>
+        <label><span>Available <span class="hint">(“Available: …”)</span></span><input type="text" id="avAvailable" maxlength="80" placeholder="Immediately for interviews"></label>
+        <label><span>Notice period</span><input type="text" id="avNotice" maxlength="80" placeholder="30 Days / Negotiable"></label>
+      </div>
+      <div class="frow" style="grid-template-columns: 1fr 1fr;">
+        <label><span>Roles</span><input type="text" id="avRoles" maxlength="200"></label>
+        <label><span>Location</span><input type="text" id="avLocation" maxlength="160"></label>
+      </div>
+      <div class="frow" style="grid-template-columns: 2fr 1fr;">
+        <label><span>Book-a-call link <span class="hint">(Google Calendar appointment schedule or Cal.com; empty = buttons hidden)</span></span><input type="text" id="avBooking" placeholder="https://calendar.app.google/…"></label>
+        <label><span>Button label</span><input type="text" id="avBookingLabel" maxlength="40" placeholder="Book a 20-min intro call"></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>💬 Recommendations <span class="hint">— paste real LinkedIn recommendations; the section appears once it has one</span></h2>
+      <div class="frow">
+        <label><span>Eyebrow</span><input type="text" id="recEyebrow"></label>
+        <label><span>Title</span><input type="text" id="recTitle"></label>
+      </div>
+      <label style="margin-top:12px"><span>Intro line</span><textarea id="recLede" rows="2"></textarea></label>
+      <div id="recItems"></div>
+      <div class="btnrow"><button class="mini" id="addRec" type="button" style="padding:9px 16px">＋ Add recommendation</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>🏅 Certifications <span class="hint">— add the Credly / Coursera verification URL to make a card clickable</span></h2>
+      <div id="certItems"></div>
+      <div class="btnrow"><button class="mini" id="addCert" type="button" style="padding:9px 16px">＋ Add certification</button></div>
     </div>
 
     <div class="panel">
@@ -254,8 +292,28 @@ function fillForm() {
   $('#svcLede').value = s.lede || '';
   $('#svcBooking').value = s.bookingUrl || '';
   $('#svcGroups').value = (s.groups || []).map(g => [g.id, g.title, g.blurb || ''].join(' | ')).join('\n');
+  const a = c.availability ||= {};
+  $('#avStatus').value = ['open', 'interviewing', 'closed'].includes(a.status) ? a.status : 'open';
+  $('#avPill').value = a.pill || '';
+  $('#avAvailable').value = a.available || '';
+  $('#avNotice').value = a.notice || '';
+  $('#avRoles').value = a.roles || '';
+  $('#avLocation').value = a.location || '';
+  $('#avBooking').value = a.bookingUrl || '';
+  $('#avBookingLabel').value = a.bookingLabel || '';
+  const rc = c.recommendations ||= { enabled: true, items: [] };
+  $('#recEnabled').checked = rc.enabled !== false;
+  $('#recEyebrow').value = rc.eyebrow || '';
+  $('#recTitle').value = rc.title || '';
+  $('#recLede').value = rc.lede || '';
+  const ce = c.certifications ||= { enabled: true, items: [] };
+  $('#certEnabled').checked = ce.enabled !== false;
+  const fc = c.fitCheck ||= { enabled: true };
+  $('#fitEnabled').checked = fc.enabled !== false;
   renderItems();
   renderSvcItems();
+  renderRecItems();
+  renderCertItems();
   updateOut();
 }
 function readForm() {
@@ -281,6 +339,26 @@ function readForm() {
   s.currency ||= 'INR';
   s.groups = lines($('#svcGroups').value).map(row => { const [id = '', title = '', blurb = ''] = row.split('|').map(x => x.trim()); return { id, title: title || id, blurb }; }).filter(g => g.id);
   s.items ||= [];
+  const a = c.availability ||= {};
+  a.status = $('#avStatus').value;
+  a.pill = $('#avPill').value.trim();
+  a.available = $('#avAvailable').value.trim();
+  a.notice = $('#avNotice').value.trim();
+  a.roles = $('#avRoles').value.trim();
+  a.location = $('#avLocation').value.trim();
+  a.bookingUrl = $('#avBooking').value.trim();
+  a.bookingLabel = $('#avBookingLabel').value.trim();
+  const rc = c.recommendations ||= { items: [] };
+  rc.enabled = $('#recEnabled').checked;
+  rc.eyebrow = $('#recEyebrow').value.trim();
+  rc.title = $('#recTitle').value.trim();
+  rc.lede = $('#recLede').value.trim();
+  rc.items ||= [];
+  const ce = c.certifications ||= { items: [] };
+  ce.enabled = $('#certEnabled').checked;
+  ce.items ||= [];
+  const fc = c.fitCheck ||= {};
+  fc.enabled = $('#fitEnabled').checked;
 }
 
 /* project items — DOM built with createElement (values never go through innerHTML) */
@@ -395,6 +473,59 @@ $('#addSvc').addEventListener('click', () => {
   s.items.push({ id: 'new-service', group: (s.groups[0] || {}).id || 'jobseekers', type: 'fixed', name: 'New service', price: 999, unit: 'one-time', meta: '', desc: '', bullets: [], after: '' });
   touch(); renderSvcItems();
   const cards = document.querySelectorAll('#svcItems .item'); cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+/* ---------- generic card-list editor (recommendations, certifications) ---------- */
+// fields: [key, label, kind('text'|'url'|'select'), opts?]; areas: [key, label, rows]. Values never touch innerHTML.
+function renderCardList({ box, items, fields, areas, title, rerender, what }) {
+  box.textContent = '';
+  items.forEach((it, i) => {
+    const head = h('div', { class: 'item-head' },
+      h('span', { class: 'nm' }, title(it)),
+      h('button', { class: 'mini', type: 'button', title: 'Move up', onclick: () => { if (i > 0) { [items[i - 1], items[i]] = [items[i], items[i - 1]]; touch(); rerender(); } } }, '↑'),
+      h('button', { class: 'mini', type: 'button', title: 'Move down', onclick: () => { if (i < items.length - 1) { [items[i + 1], items[i]] = [items[i], items[i + 1]]; touch(); rerender(); } } }, '↓'),
+      (() => { const cb = h('input', { type: 'checkbox' }); cb.checked = it.hidden === true; cb.addEventListener('change', () => { if (cb.checked) it.hidden = true; else delete it.hidden; touch(); card.classList.toggle('off', !!it.hidden); }); return h('label', { class: 'check' }, cb, ' hidden'); })(),
+      h('button', { class: 'mini danger', type: 'button', onclick: () => { if (confirm(`Delete this ${what}?`)) { items.splice(i, 1); touch(); rerender(); } } }, '🗑 delete'));
+    const grid = h('div', { class: 'frow' });
+    for (const [key, label, kind, opts] of fields) {
+      let input;
+      if (kind === 'select') { input = h('select', {}); (opts || []).forEach(o => input.append(h('option', { value: o }, o))); input.value = it[key] || opts[0]; }
+      else { input = h('input', { type: 'text' }); input.value = it[key] || ''; if (kind === 'url') input.placeholder = 'https://…'; }
+      input.addEventListener('input', () => { const v = input.value.trim(); if (v) it[key] = v; else delete it[key]; head.querySelector('.nm').textContent = title(it); touch(); });
+      grid.append(h('label', {}, h('span', {}, label), input));
+    }
+    const card = h('div', { class: 'item' + (it.hidden ? ' off' : '') }, head, grid);
+    for (const [key, label, rows] of areas) {
+      const ta = h('textarea', { rows: String(rows) }); ta.value = it[key] || '';
+      ta.addEventListener('input', () => { it[key] = ta.value.trim(); touch(); });
+      card.append(h('label', { style: 'margin-top:12px' }, h('span', {}, label), ta));
+    }
+    box.append(card);
+  });
+}
+function renderRecItems() {
+  const items = (state.cfg.recommendations ||= { items: [] }).items ||= [];
+  renderCardList({ box: $('#recItems'), items, what: 'recommendation', rerender: renderRecItems,
+    title: it => `${it.name || 'Unnamed'}${it.company ? ' · ' + it.company : ''}`,
+    fields: [['name', 'Full name', 'text'], ['role', 'Their role / title', 'text'], ['company', 'Company', 'text'], ['url', 'LinkedIn profile URL', 'url'], ['avatar', 'Photo URL (optional)', 'url']],
+    areas: [['text', 'Recommendation text (as written, no surrounding quotes)', 4]] });
+}
+function renderCertItems() {
+  const items = (state.cfg.certifications ||= { items: [] }).items ||= [];
+  renderCardList({ box: $('#certItems'), items, what: 'certification', rerender: renderCertItems,
+    title: it => `${it.icon || '🏅'} ${it.name || 'Untitled'}${it.when ? ' · ' + it.when : ''}`,
+    fields: [['icon', 'Icon (emoji)', 'text'], ['name', 'Name', 'text'], ['issuer', 'Issuer', 'text'], ['when', 'Date', 'text'], ['verifyUrl', 'Verification URL (Credly / Coursera)', 'url']],
+    areas: [['blurb', 'One-line summary', 2]] });
+}
+$('#addRec').addEventListener('click', () => {
+  (state.cfg.recommendations ||= { items: [] }).items.push({ name: '', role: '', company: '', text: '', url: '' });
+  touch(); renderRecItems();
+  const cards = document.querySelectorAll('#recItems .item'); cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+$('#addCert').addEventListener('click', () => {
+  (state.cfg.certifications ||= { items: [] }).items.push({ icon: '🏅', name: '', issuer: '', blurb: '', when: '', verifyUrl: '' });
+  touch(); renderCertItems();
+  const cards = document.querySelectorAll('#certItems .item'); cards[cards.length - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 });
 
 /* ---------- digital product files ---------- */
@@ -611,6 +742,14 @@ $('#save').addEventListener('click', async () => {
   const dupe = svcItems.map(i => i.id).find((id, i, a) => a.indexOf(id) !== i);
   if (dupe) return msg($('#msg'), 'err', `Two services share the id "${dupe}" — ids must be unique.`);
   if (state.cfg.services?.bookingUrl && !/^https?:\/\//i.test(state.cfg.services.bookingUrl)) return msg($('#msg'), 'err', 'Booking link must start with http(s)://.');
+  const av = state.cfg.availability || {};
+  if (av.bookingUrl && !/^https?:\/\//i.test(av.bookingUrl)) return msg($('#msg'), 'err', 'Availability: the book-a-call link must start with http(s):// (or be empty).');
+  const badRec = (state.cfg.recommendations?.items || []).find(r => (r.name || r.text) && (!r.name || !r.text || (r.text || '').length < 20));
+  if (badRec) return msg($('#msg'), 'err', `Recommendation "${badRec.name || '?'}": needs a name and at least 20 characters of text (or delete the empty card).`);
+  const badRecUrl = (state.cfg.recommendations?.items || []).find(r => ['url', 'avatar'].some(k => r[k] && !/^https?:\/\//i.test(r[k])));
+  if (badRecUrl) return msg($('#msg'), 'err', `Recommendation "${badRecUrl.name}": links must start with http(s)://.`);
+  const badCert = (state.cfg.certifications?.items || []).find(c => !c.name || (c.verifyUrl && !/^https?:\/\//i.test(c.verifyUrl)));
+  if (badCert) return msg($('#msg'), 'err', `Certification "${badCert.name || '?'}": needs a name, and the verification URL must start with http(s):// (or be empty).`);
   const text = serializeConfig(state.cfg);
   try { parseConfigJs(text); } catch (e) { return msg($('#msg'), 'err', 'Internal serialization error: ' + e.message); }
   if (!state.token) { updateOut(); $('#outPanel').classList.add('show'); $('#outPanel').scrollIntoView({ behavior: 'smooth' }); msg($('#msg'), 'ok', 'File generated below — copy or download it, then commit as assets/config.js (fallback defaults).'); return; }

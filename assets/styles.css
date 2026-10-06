@@ -366,8 +366,39 @@ section { padding: 108px 0; position: relative; }
 .details .hd { color: var(--accent); font-style: normal; }
 .hire-btns { display: flex; gap: 12px; flex-wrap: wrap; }
 
+/* availability (config-driven): the pill's dot reflects status */
+.pill[data-status="interviewing"] .dot { background: var(--accent3); }
+.pill[data-status="closed"] .dot { background: var(--muted); animation: none; }
+.pill[data-status="closed"] { color: var(--text2); border-color: var(--border-strong); background: var(--card); }
+.btn-book { background: var(--text); color: var(--bg); }
+.btn-book:hover { color: var(--bg); box-shadow: 0 10px 34px color-mix(in oklab, var(--text) 25%, transparent); }
+.clink-emoji { font-size: 1.25rem; width: 20px; text-align: center; flex-shrink: 0; }
+.fit-cta { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; padding-top: 18px; border-top: 1px dashed var(--border-strong); }
+.fit-hint { font-size: .78rem; color: var(--muted); }
+
+/* recommendations (config-driven) */
+.recs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.rec { padding: 26px 26px 22px; display: flex; flex-direction: column; gap: 18px; margin: 0; }
+.rec blockquote { margin: 0; position: relative; padding-top: 18px; }
+.rec blockquote::before { content: '\201C'; position: absolute; top: -22px; left: -6px; font-size: 4.2rem; line-height: 1; font-weight: 900; color: var(--accent); opacity: .35; font-family: Georgia, 'Times New Roman', serif; }
+.rec blockquote p { font-size: .94rem; line-height: 1.72; color: var(--text); }
+.rec figcaption { display: flex; align-items: center; gap: 12px; margin-top: auto; }
+.rec-av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-weight: 800; font-size: .78rem; letter-spacing: .02em; color: #fff; background: var(--grad); }
+.rec-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+.rec-who { min-width: 0; }
+.rec-who b { display: block; font-size: .88rem; }
+.rec-who small { display: block; color: var(--muted); font-size: .74rem; line-height: 1.4; }
+.rec-in { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: .66rem; color: var(--muted); flex-shrink: 0; }
+.rec-in svg { width: 14px; height: 14px; fill: currentColor; }
+.rec-in:hover { color: #0a66c2; }
+
 /* certs & awards */
 .cert { padding: 20px 22px; display: flex; gap: 14px; align-items: flex-start; }
+a.cert { color: inherit; }
+a.cert:hover h3 { color: var(--accent); }
+.cert .issuer { font-family: var(--mono); font-size: .66rem; color: var(--text2); margin-bottom: 4px; }
+.cert .verify { margin-left: 10px; color: var(--accent); }
+a.cert:hover .verify { text-decoration: underline; }
 .cert .ico { font-size: 1.7rem; flex-shrink: 0; }
 .cert h3 { font-size: .9rem; font-weight: 700; margin-bottom: 3px; }
 .cert p { font-size: .77rem; color: var(--muted); }
@@ -554,6 +585,48 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
 .dlg-foot .err { color: #f87171; font-size: .8rem; flex: 1; min-width: 0; }
 .dlg-foot .btn { margin-left: auto; }
 .dlg .fallback { margin-top: 18px; padding: 16px; border-radius: 12px; border: 1px dashed var(--border-strong); background: var(--card); font-size: .86rem; color: var(--text2); }
+
+/* JD fit check dialog */
+.dlg.fit { width: min(760px, 94vw); }
+.fit-meta { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: .66rem; color: var(--muted); margin-top: 6px; }
+.fit-out { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.fit-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.fit-score { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-weight: 900; font-size: 1.25rem; letter-spacing: -.03em;
+  background: conic-gradient(var(--fc) calc(var(--p) * 1%), var(--border) 0); position: relative; color: var(--text); }
+.fit-score::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: var(--bg2); }
+.fit-score span { position: relative; }
+.fit-verdict { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--fc); margin-bottom: 4px; }
+.fit-headline { font-size: 1rem; font-weight: 700; line-height: 1.45; }
+.fit-out[data-v="strong"], .fit-out[data-v="good"] { --fc: var(--ok); }
+.fit-out[data-v="partial"] { --fc: var(--accent3); }
+.fit-out[data-v="weak"] { --fc: #f87171; }
+.fit-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+@media (max-width: 600px) { .fit-cols { grid-template-columns: 1fr; } }
+.fit-col h4 { font-family: var(--mono); font-size: .66rem; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: 10px; }
+.fit-col ul { list-style: none; display: grid; gap: 8px; }
+.fit-col li { font-size: .84rem; line-height: 1.55; color: var(--text2); padding-left: 18px; position: relative; }
+.fit-col li b { color: var(--text); font-weight: 600; }
+.fit-col li::before { content: ''; position: absolute; left: 0; top: .5em; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); }
+.fit-col.gaps li::before { background: var(--accent3); }
+.fit-col.talk li::before { background: var(--accent); }
+.fit-col.ask li::before { background: var(--accent2); }
+.fit-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 18px; }
+.fit-actions .btn { padding: 10px 18px; font-size: .84rem; }
+.fit-actions .fine { margin: 0; }
+.fit-send { margin-top: 14px; display: grid; gap: 10px; }
+.fit-send .f2 { margin: 0; }
+.fit-cached { font-family: var(--mono); font-size: .64rem; color: var(--muted); margin-left: auto; }
+.fit-busy { display: inline-flex; align-items: center; gap: 8px; }
+.fit-busy::before { content: ''; width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--border-strong); border-top-color: var(--accent); animation: spin360 .8s linear infinite; }
+@keyframes spin360 { to { transform: rotate(360deg); } }
+
+/* cross-document view transitions: pages morph instead of flashing (Chrome, Safari 18.2+; others just navigate).
+   The nav is only named during a navigation (see pageswap/pagereveal in main.js) so the theme toggle's circular
+   reveal keeps treating the whole page as one root. */
+@view-transition { navigation: auto; }
+.vt-nav .nav { view-transition-name: site-nav; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .26s; }
+::view-transition-group(site-nav) { animation-duration: .26s; }
 .dlg .fallback .btn { margin-top: 12px; }
 .done-body { font-size: .9rem; color: var(--text2); line-height: 1.65; }
 .done-body .kv { font-family: var(--mono); font-size: .74rem; color: var(--muted); margin: 8px 0 14px; }
@@ -605,6 +678,8 @@ footer .meta { font-family: var(--mono); font-size: .7rem; margin-top: 8px; }
 
 /* ---------- reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
   .js .reveal { opacity: 1 !important; transform: none !important; animation: none !important; }
   .progress { animation: none !important; }

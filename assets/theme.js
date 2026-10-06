@@ -44,6 +44,18 @@
     reset: function () { try { localStorage.removeItem('sk-theme'); } catch (e) {} apply(resolve()); }
   };
 
+  // Cross-document view transitions (styles.css: @view-transition { navigation: auto }). The nav gets its
+  // view-transition-name only while a navigation is in flight, so it morphs between pages but the theme
+  // toggle's circular reveal still animates the page as a single root. Must run from <head>: pagereveal
+  // fires before the first render of the new page.
+  addEventListener('pageswap', function (e) { if (e.viewTransition) html.classList.add('vt-nav'); });
+  addEventListener('pagereveal', function (e) {
+    if (!e.viewTransition) return;
+    html.classList.add('vt-nav');
+    var off = function () { html.classList.remove('vt-nav'); };
+    e.viewTransition.finished.then(off, off);
+  });
+
   // Follow the clock while automatic (and only when the page has no fixed default).
   if (!html.getAttribute('data-theme-default')) {
     setInterval(function () {
