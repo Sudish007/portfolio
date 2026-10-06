@@ -1,8 +1,10 @@
 /* =====================================================================
    sudish.dev — SITE CONFIG (edit this file, nothing else)
    ---------------------------------------------------------------------
-   Controls the two dynamic sections. Save → commit → push; Netlify
-   redeploys in ~30 s. Quick edit in the browser:
+   Controls the dynamic sections (Live Projects, GitHub feed, Services,
+   Availability, Recommendations, Certifications, JD fit check). The
+   admin page edits the same shape live; this file is the fallback.
+   Save → commit → push; Netlify redeploys in ~30 s. Quick edit:
    https://github.com/Sudish007/portfolio/edit/master/assets/config.js
 
    Rules of thumb
@@ -222,5 +224,51 @@ globalThis.SK_CONFIG = {
         bullets: ['Data pipeline from your sources', 'Tableau / Power BI or web dashboard', 'Scheduled reports to email or WhatsApp', 'Handover and training']
       }
     ]
+  },
+
+  /* Hero pill, status chips and the "Hire Me" facts. Edit here or in admin → Availability; no redeploy needed. */
+  availability: {
+    status: 'open',                    // 'open' (green dot) | 'interviewing' (amber) | 'closed' (grey, pill reads as informational)
+    pill: 'Open to AI/ML Engineering Roles',
+    available: 'Immediately for interviews',
+    roles: 'ML Engineer, GenAI Engineer, Data Scientist, NLP Engineer, MLOps, AI Solutions Architect',
+    location: 'Anywhere (preferred: Bengaluru / Hyderabad / Pune / Gurgaon)',
+    notice: '30 Days / Negotiable',
+    bookingUrl: '',                    // Google Calendar appointment schedule or Cal.com link. '' hides every "Book a call" button.
+    bookingLabel: 'Book a 20-min intro call'
+  },
+
+  /* Social proof. Paste real LinkedIn recommendations (ask permission for anything not already public).
+     The section stays hidden until it has at least one item. `url` = the recommender's LinkedIn profile. */
+  recommendations: {
+    enabled: true,
+    eyebrow: 'What colleagues say',
+    title: 'Recommendations',
+    lede: 'From the people I have shipped with, as written on LinkedIn.',
+    items: [
+      // { name: 'Full Name', role: 'Senior Manager, Applied Science', company: 'Amazon', text: 'Sudish ...', url: 'https://linkedin.com/in/...' }
+    ]
+  },
+
+  /* Credentials. `verifyUrl` turns a card into a link (Credly / Coursera / AWS verification page); '' = plain card. */
+  certifications: {
+    enabled: true,
+    items: [
+      { icon: '🏅', name: 'AWS Certified AI Practitioner',              issuer: 'Amazon Web Services', blurb: 'AI/ML concepts, generative AI, responsible AI',                                                   when: 'Dec 2025', verifyUrl: '' },
+      { icon: '🏅', name: 'AWS Generative AI Developer',                issuer: 'Amazon Web Services', blurb: 'GenAI apps, foundation models, RAG architectures',                                               when: '2026',     verifyUrl: '' },
+      { icon: '📊', name: 'Google Data Analytics Professional',         issuer: 'Google / Coursera',   blurb: 'SQL, R, Tableau, data cleaning & visualization',                                               when: 'Apr 2025', verifyUrl: '' },
+      { icon: '📋', name: 'Project Management (Agile/Scrum)',           issuer: 'Coursera',            blurb: 'Waterfall & Agile, Scrum framework',                                                           when: 'Jan 2024', verifyUrl: '' },
+      { icon: '🐍', name: 'Python for Data Science & AI',               issuer: 'IBM / Coursera',      blurb: 'Python programming, data structures, APIs, web scraping, and data analysis with Pandas',        when: '2024',     verifyUrl: '' },
+      { icon: '🗄️', name: 'SQL for Data Science',                      issuer: 'UC Davis / Coursera', blurb: 'Advanced SQL queries, subqueries, joins, data wrangling for data science applications',         when: '2024',     verifyUrl: '' }
+    ]
+  },
+
+  /* "Paste the JD, get a fit report" for recruiters. Shown only when the server has an LLM key
+     (FIT_API_KEY in Netlify env; see netlify/functions/fit.mjs). */
+  fitCheck: {
+    enabled: true,
+    label: 'Check my fit for your JD',
+    title: 'Paste the job description',
+    blurb: 'A short, honest fit report against my public profile: matched skills, real gaps and what to ask me about. About 20 seconds. The description is only kept if you choose to send it to me.'
   }
 };
