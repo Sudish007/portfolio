@@ -111,7 +111,7 @@ function renderAvailability() {
   // A customised pill is shown as written in every language; the stock English pill keeps its translations.
   if (pt && a.pill && a.pill !== DEFAULT_PILL) { pt.removeAttribute('data-i18n'); pt.textContent = a.pill; }
   const hud = $('#hudAvail');
-  if (hud) { hud.textContent = a.available ? `Available: ${a.available}` : ''; hud.closest('span').hidden = !a.available; }
+  if (hud) { hud.textContent = a.available || ''; $('#hudAvailWrap').hidden = !a.available; }   // the "Available:" label is translated separately
   for (const [id, v] of [['#avRoles', a.roles], ['#avLocation', a.location], ['#avNotice', a.notice], ['#avAvailable', a.available]]) {
     const el = $(id); if (!el) continue;
     el.textContent = v || ''; el.parentElement.hidden = !v;
@@ -349,20 +349,16 @@ function initTheme() {
 }
 
 /* ---------- i18n ---------- */
-const T = {
-en:{hero_badge:"Open to AI/ML Engineering Roles",hero_desc:"I build AI systems that actually ship to production — not just notebooks that collect dust. Currently at Amazon deploying agentic AI and benchmarking LLMs. Two AWS certifications, 99%+ accuracy across 10+ initiatives, and tools that save my team 150+ hours daily. Looking for my next challenge."},
-hi:{hero_badge:"AI/ML इंजीनियरिंग भूमिकाओं के लिए उपलब्ध",hero_desc:"मैं ऐसे AI सिस्टम बनाता हूं जो सच में production में चलते हैं — सिर्फ notebooks में पड़े नहीं रहते। फिलहाल Amazon में agentic AI deploy कर रहा हूं और LLMs benchmark कर रहा हूं। दो AWS certifications, 10+ initiatives में 99%+ accuracy, और tools जो team के 150+ hours daily बचाते हैं।"},
-bho:{hero_badge:"AI/ML इंजीनियरिंग के काम खातिर तइयार बानी",hero_desc:"हम अइसन AI सिस्टम बनावत बानी जे सच में production में चलेला — बस notebook में धूल ना खाला। अभी Amazon में agentic AI deploy करत बानी। दू गो AWS certifications बा, 10+ initiatives में 99%+ accuracy, आ tools जे team के 150+ hours रोज बचावेला।"},
-de:{hero_badge:"Offen für AI/ML Engineering Positionen",hero_desc:"Ich baue AI-Systeme, die tatsächlich in Produktion laufen — nicht nur Notebooks. Derzeit bei Amazon: agentic AI deployen und LLMs benchmarken. Zwei AWS-Zertifizierungen, 99%+ Genauigkeit in 10+ Initiativen, Tools die meinem Team 150+ Stunden täglich sparen."},
-fr:{hero_badge:"Ouvert aux postes d'ingénieur AI/ML",hero_desc:"Je construis des systèmes AI qui vont réellement en production — pas des notebooks qui prennent la poussière. Actuellement chez Amazon à déployer de l'AI agentique et benchmarker des LLMs. Deux certifications AWS, 99%+ de précision sur 10+ initiatives, des outils qui économisent 150+ heures par jour à mon équipe."},
-es:{hero_badge:"Abierto a posiciones de Ingeniería AI/ML",hero_desc:"Construyo sistemas AI que realmente llegan a producción — no solo notebooks juntando polvo. Actualmente en Amazon desplegando AI agéntica y benchmarking de LLMs. Dos certificaciones AWS, 99%+ precisión en 10+ iniciativas, herramientas que ahorran 150+ horas diarias a mi equipo."}
-};
+// Dictionary lives in assets/i18n.js (window.SK_I18N). English is the DOM default, so T.en must hold every key
+// for switching back; a key missing in another language leaves the English text in place.
+const T = window.SK_I18N || { en: {} };
 const langMenu = $('#langMenu'), langBtn = $('#langBtn');
 function setLang(lang) {
-  const t = T[lang] || T.en;
+  const t = { ...T.en, ...(T[lang] || {}) };
   try { localStorage.setItem('sk-lang', lang); } catch { /* ignore */ }
   document.documentElement.lang = lang === 'bho' ? 'bho' : lang;
   $$('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (t[k]) el.textContent = t[k]; });
+  $$('[data-i18n-ph]').forEach(el => { const k = el.dataset.i18nPh; if (t[k]) el.placeholder = t[k]; });
   $$('button[data-lang]', langMenu).forEach(b => b.setAttribute('aria-checked', String(b.dataset.lang === lang)));
   hideLangMenu();
 }
@@ -580,6 +576,41 @@ function initFilters() {
   }));
 }
 
+/* ---------- role-tailored view: sudish.dev/?role=genai|mle|ds|mlops ----------
+   One link per application: the skill cards most relevant to that role come first, the project filter starts on
+   the matching category, the typewriter leads with the role and the tab title names it. Nothing is hidden. */
+const ROLES = {
+  genai: { label: 'GenAI Engineer',  typer: 'Generative AI Engineer', filter: 'genai', skills: ['genai', 'aws', 'ml', 'python', 'sql', 'tools', 'analytics', 'web'] },
+  mle:   { label: 'ML Engineer',     typer: 'ML Engineer',            filter: 'ml',    skills: ['ml', 'aws', 'python', 'genai', 'sql', 'tools', 'analytics', 'web'] },
+  ds:    { label: 'Data Scientist',  typer: 'Data Scientist',         filter: 'data',  skills: ['sql', 'analytics', 'python', 'ml', 'genai', 'aws', 'tools', 'web'] },
+  mlops: { label: 'MLOps Engineer',  typer: 'MLOps Engineer',         filter: 'mlops', skills: ['aws', 'tools', 'python', 'ml', 'genai', 'sql', 'analytics', 'web'] }
+};
+const ROLE_ALIAS = { ml: 'mle', 'ml-engineer': 'mle', data: 'ds', 'data-scientist': 'ds', 'data-science': 'ds', gen: 'genai', llm: 'genai', 'genai-engineer': 'genai', ops: 'mlops' };
+let roleView = null;                                                     // key of the active role, if any
+function initRoleView() {
+  const raw = (new URLSearchParams(location.search).get('role') || '').toLowerCase().trim();
+  const key = ROLES[raw] ? raw : ROLE_ALIAS[raw];
+  if (!key) return;
+  const r = ROLES[key]; roleView = key;
+  document.documentElement.dataset.role = key;
+  document.title = `Sudish Kumar | ${r.label} — ML & AI Portfolio`;
+  // 1. skills grid: relevant cards first (DOM order; the grid itself is unchanged)
+  const grid = $('#skills .grid-3');
+  if (grid) r.skills.map(k => grid.querySelector(`[data-skill="${k}"]`)).filter(Boolean).forEach(el => grid.append(el));
+  // 2. typewriter leads with the role (initTypewriter reads data-roles after this runs)
+  const typer = $('#typer');
+  if (typer) { try { const roles = JSON.parse(typer.dataset.roles || '[]'); typer.dataset.roles = JSON.stringify([r.typer, ...roles.filter(x => x !== r.typer)]); } catch { /* keep */ } }
+  // 3. a small note in the hero so the visitor knows the ordering is intentional (and how to undo it)
+  const note = $('#roleNote');
+  if (note) { $('#roleNoteLabel').textContent = r.label; note.hidden = false; }
+}
+function applyRoleFilter() {                                            // after initFilters has bound the chips
+  if (!roleView) return;
+  const chip = $(`.chip[data-filter="${ROLES[roleView].filter}"]`);
+  if (chip && chip.getAttribute('aria-pressed') !== 'true') chip.click();
+}
+const roleLink = key => `${location.origin}${location.pathname.replace(/index\.html$/, '')}?role=${key}`;
+
 /* ---------- command palette ---------- */
 function score(q, text) {
   if (!q) return 1;
@@ -600,15 +631,20 @@ function initPalette() {
   const items = [];
   const add = (g, i, l, run, h = '', k = '') => items.push({ g, i, l, run, h, k });
   paletteAdd = add;
-  [['#top', '🏠', 'Top'], ['#numbers', '📊', 'Impact — By the Numbers'], ['#skills', '🧠', 'Skills'], ['#experience', '💼', 'Experience'],
-   ['#projects', '🧪', 'Projects'], ['#live', '🚀', 'Live Projects'], ['#github', '🐙', 'Live from GitHub'], ['#why-hire', '🎯', 'Why Hire Me'],
-   ['#recommendations', '💬', 'Recommendations'], ['#hire-me', '🔥', 'Hire Me'], ['#certifications', '🏅', 'Certifications'], ['#awards', '🏆', 'Awards'], ['#contact', '✉️', 'Contact']
-  ].forEach(([h, i, l]) => { const el = $(h); if (el && !el.hidden) add('Go to', i, l, () => jump(el), 'section', 'go jump'); });
+  // 4th column = synonyms, so "pay", "android apps" or "references" land on the right section without a model.
+  [['#top', '🏠', 'Top', 'home start hero'], ['#numbers', '📊', 'Impact — By the Numbers', 'stats metrics results achievements'],
+   ['#skills', '🧠', 'Skills', 'stack tools tech python pytorch aws sql'], ['#experience', '💼', 'Experience', 'work history amazon aws jobs career timeline'],
+   ['#projects', '🧪', 'Projects', 'portfolio code demos case studies'], ['#live', '🚀', 'Live Projects', 'apps products android play store websites shipped kaatdo'],
+   ['#github', '🐙', 'Live from GitHub', 'repos open source'], ['#why-hire', '🎯', 'Why Hire Me', 'pitch strengths reasons'],
+   ['#recommendations', '💬', 'Recommendations', 'testimonials quotes references social proof colleagues'], ['#hire-me', '🔥', 'Hire Me', 'recruit job role availability notice period location salary'],
+   ['#certifications', '🏅', 'Certifications', 'certs aws credly badges credentials verify'], ['#awards', '🏆', 'Awards', 'recognition prime player'],
+   ['#contact', '✉️', 'Contact', 'email whatsapp linkedin reach message phone']
+  ].forEach(([h, i, l, k]) => { const el = $(h); if (el && !el.hidden) add('Go to', i, l, () => jump(el), 'section', `go jump ${k}`); });
   if (bookingUrl()) add('Actions', '📅', bookingLabel(), () => openUrl(bookingUrl()), '↗', 'book call meeting schedule calendar interview recruiter');
   $$('#projectGrid .proj').forEach(p => add('Projects', '📦', p.querySelector('h3')?.textContent || '', () => { if (p.hidden) $('.chip[data-filter="all"]')?.click(); jump(p, true); }, 'project', p.querySelector('.cat')?.textContent || ''));
   if (CFG.liveProjects?.enabled !== false) (CFG.liveProjects?.items || []).forEach(p => { const u = p.playStore || p.website || p.apk; if (p?.name && u) add('Live projects', p.icon || '🚀', p.name, () => openUrl(u), 'open ↗', p.tagline || ''); });
   if (CFG.services?.enabled !== false) {
-    add('Services', '💼', 'All services & pricing', () => { location.href = 'services.html'; }, 'page', 'hire buy price rates');
+    add('Services', '💼', 'All services & pricing', () => { location.href = 'services.html'; }, 'page', 'hire buy pay payment price cost rates mentoring resume review mock interview freelance');
     (CFG.services?.items || []).filter(s => s && s.id && !s.hidden).forEach(s => {
       const price = s.unit === 'from' ? `from ₹${Number(s.price).toLocaleString('en-IN')}` : `₹${Number(s.price).toLocaleString('en-IN')}`;
       add('Services', s.type === 'quote' ? '📝' : '🛒', s.name, () => { location.href = `services.html?service=${encodeURIComponent(s.id)}`; }, price, `${s.meta || ''} ${s.group || ''} buy book`);
@@ -632,7 +668,9 @@ function initPalette() {
   if (isOwner) {
     add('Owner', '⚙️', 'Open admin editor', () => openUrl('admin.html'), '↗', 'admin edit config hide repos live projects');
     add('Owner', '📝', 'Edit config.js on GitHub (raw)', () => openUrl('https://github.com/Sudish007/portfolio/edit/master/assets/config.js'), '↗', 'config raw github');
+    Object.entries(ROLES).forEach(([k, r]) => add('Owner', '🔗', `Copy tailored link: ${r.label} roles`, () => copyText(roleLink(k)), `?role=${k}`, 'role link share apply recruiter tailored'));
   }
+  if (roleView) add('Preferences', '🧩', 'Show the standard (untailored) view', () => { location.href = location.pathname; }, 'all', 'role reset default view');
 
   let view = [], sel = 0;
   const paint = () => { $$('.cmdk-it', list).forEach(b => b.setAttribute('aria-selected', String(+b.dataset.idx === sel))); const b = list.querySelector(`[data-idx="${sel}"]`); b?.scrollIntoView({ block: 'nearest' }); input.setAttribute('aria-activedescendant', b?.id || ''); };
@@ -695,6 +733,7 @@ function initContactForm() {
     };
     if (!data.name || !data.contact) return toast('Name and a way to reach you, please.');
     if (data.message.length < 10) return toast('Message is a bit short — add a few details.');
+    const label = btn.textContent;             // whatever the current language shows
     btn.disabled = true; btn.textContent = 'Sending…';
     try {
       const r = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
@@ -706,7 +745,7 @@ function initContactForm() {
     } catch {
       toast('Could not send right now — WhatsApp or email me instead.');
     }
-    btn.disabled = false; btn.textContent = 'Send message →';
+    btn.disabled = false; btn.textContent = label;
   });
 }
 
@@ -917,6 +956,7 @@ async function loadRemoteConfig() {
 /* ---------- boot ---------- */
 initTheme();
 initI18n();
+initRoleView();                               // before the typewriter/filters read the DOM
 initNav();
 observeReveals();
 initSpotlight();
@@ -925,6 +965,7 @@ initCountUps();
 initTypewriter();
 initClock();
 initFilters();
+applyRoleFilter();
 initContact();
 initContactForm();
 // Config-driven sections render once the live config answers (or immediately on fallback).

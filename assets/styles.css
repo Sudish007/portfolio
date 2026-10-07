@@ -5,6 +5,18 @@
    @starting-style, view transitions — each with a graceful fallback.
    ========================================================================== */
 
+/* ---------- self-hosted fonts (variable, latin + latin-ext; Devanagari falls back to the system font) ----------
+   Same files Google Fonts serves, from our own origin: no third-party connection before first paint, no Google
+   Fonts GDPR footnote for EU recruiters, and one request per family instead of one per weight. */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 300 900; font-display: swap; src: url('fonts/inter-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 300 900; font-display: swap; src: url('fonts/inter-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('fonts/jetbrains-mono-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('fonts/jetbrains-mono-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
 /* ---------- registered custom properties (animatable) ---------- */
 @property --ga { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @property --hue { syntax: '<number>'; inherits: true; initial-value: 0; }
@@ -215,7 +227,11 @@ kbd { font-family: var(--mono); font-size: .68rem; padding: 2px 6px; border: 1px
   background: var(--glow); border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent); }
 .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); animation: ping 2.4s ease-out infinite; }
 .hud { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 14px 0 22px; }
-.hud span { font-family: var(--mono); font-size: .7rem; color: var(--muted); padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.role-note { margin: -10px auto 22px; max-width: var(--reading-max); font-size: .78rem; color: var(--text2); padding: 8px 14px; border-radius: 10px;
+  border: 1px dashed color-mix(in oklab, var(--accent2) 45%, transparent); background: color-mix(in oklab, var(--accent2) 8%, transparent); }
+.role-note b { color: var(--text); }
+.role-note a { margin-left: 6px; font-weight: 600; }
+.hud > span { font-family: var(--mono); font-size: .7rem; color: var(--muted); padding: 5px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
 .hud b { color: var(--text2); font-weight: 500; }
 .hero-name { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; margin-bottom: 10px; }
 .ring { width: 128px; height: 128px; border-radius: 50%; padding: 4px; flex-shrink: 0;
@@ -362,7 +378,7 @@ section { padding: 108px 0; position: relative; }
 .hire h2 { font-size: clamp(1.7rem, 4vw, 2.3rem); font-weight: 900; letter-spacing: -.03em; margin-bottom: 14px; }
 .hire .sub { color: var(--text2); margin-bottom: 20px; }
 .details { display: grid; gap: 10px; margin: 0 0 30px; font-size: .87rem; color: var(--text2); }
-.details span { display: block; padding-left: 1.2em; text-indent: -1.2em; }
+.details > span { display: block; padding-left: 1.2em; text-indent: -1.2em; }   /* direct children only: label/value spans inside stay inline */
 .details .hd { color: var(--accent); font-style: normal; }
 .hire-btns { display: flex; gap: 12px; flex-wrap: wrap; }
 
