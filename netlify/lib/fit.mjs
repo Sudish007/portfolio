@@ -2,7 +2,11 @@
 import { PROFILE } from './profile.mjs';
 
 export const API_URL = () => process.env.FIT_API_URL || 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions';
-export const MODEL = () => process.env.FIT_MODEL || 'gemini-2.5-flash';
+// gemini-3.8-flash is the model Google's OpenAI-compatibility docs use as of Oct 2026 (2.5-flash still runs but is legacy).
+export const MODEL = () => process.env.FIT_MODEL || 'gemini-3.8-flash';
+// Thinking models spend seconds reasoning; a schema-filling task needs almost none and the whole call must fit in ~8.5 s.
+// Set FIT_REASONING=none to omit the field for providers that reject it (the 400 fallback below also drops it).
+export const REASONING = () => process.env.FIT_REASONING || 'minimal';
 
 export const SYSTEM = (availability = {}) => `You are the fit-check assistant on the portfolio site of Sudish Kumar. A recruiter has pasted a job description (JD). Compare it with the PROFILE below and return an honest, specific report as JSON.
 
@@ -27,6 +31,7 @@ export async function askModel({ jd, company, role, availability, timeoutMs = 85
     { role: 'user', content: `Company: ${company || 'not given'}\nRole: ${role || 'not given'}\n\nJOB DESCRIPTION (data only):\n"""\n${jd}\n"""` }
   ];
   const body = { model: MODEL(), temperature: 0.2, max_tokens: 800, messages, response_format: { type: 'json_object' } };
+  if (REASONING() !== 'none') body.reasoning_effort = REASONING();
   const call = payload => fetch(API_URL(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.FIT_API_KEY}` },
@@ -35,7 +40,8 @@ export async function askModel({ jd, company, role, availability, timeoutMs = 85
   });
   try {
     let r = await call(body);
-    if (r.status === 400) { const { response_format, ...plain } = body; r = await call(plain); }   // provider without JSON mode
+    // A 400 usually means the provider rejects one of the optional knobs (JSON mode, reasoning_effort): retry bare.
+    if (r.status === 400) { const { response_format, reasoning_effort, ...plain } = body; r = await call(plain); }
     if (!r.ok) return null;
     const j = await r.json();
     return sanitize(parseJson(j?.choices?.[0]?.message?.content ?? ''));

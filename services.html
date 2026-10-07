@@ -19,10 +19,11 @@
 <link rel="apple-touch-icon" sizes="180x180" href="assets/brand/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <script defer data-domain="sudish.dev" src="https://plausible.io/js/script.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://checkout.razorpay.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Hovering the logo / "back" links prefetches the home page so the view transition back is instant. -->
+<script type="speculationrules">{"prefetch":[{"where":{"and":[{"href_matches":"/"},{"not":{"href_matches":"/*.pdf"}}]},"eagerness":"moderate"}]}</script>
 <link rel="stylesheet" href="assets/styles.css">
 <script src="assets/theme.js"></script>
 </head>

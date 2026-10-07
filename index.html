@@ -27,10 +27,12 @@
 <link rel="manifest" href="site.webmanifest">
 <!-- Plausible Analytics (lightweight, privacy-friendly) -->
 <script defer data-domain="sudish.dev" src="https://plausible.io/js/script.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="assets/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preconnect" href="https://api.github.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Prefetch the Services page the moment a link to it is hovered, so the view transition lands on an already-loaded document.
+     prefetch (not prerender) on purpose: prerendering would run checkout/analytics scripts for pages never visited. -->
+<script type="speculationrules">{"prefetch":[{"where":{"href_matches":"/services*"},"eagerness":"moderate"}]}</script>
 <link rel="stylesheet" href="assets/styles.css">
 <!-- Theme bootstrap (before first paint): saved choice > page default > IST clock (light 10:00–18:00) -->
 <script src="assets/theme.js"></script>
@@ -67,15 +69,15 @@
 <div class="container nav-inner">
 <a href="#top" class="logo" aria-label="sudish.dev — home"><span class="logo-mark"><img src="assets/brand/favicon.svg" alt="" width="28" height="28"></span><span class="logo-text">sudish<b>.dev</b></span></a>
 <ul class="nav-links" id="navLinks">
-<li><a href="#skills">Skills</a></li>
-<li><a href="#experience">Experience</a></li>
-<li><a href="#projects">Projects</a></li>
-<li><a href="#live" data-config="liveProjects">Live work</a></li>
-<li><a href="services.html" data-config="services">Services</a></li>
-<li><a href="#hire-me" class="hot">Hire me</a></li>
+<li><a href="#skills" data-i18n="nav_skills">Skills</a></li>
+<li><a href="#experience" data-i18n="nav_experience">Experience</a></li>
+<li><a href="#projects" data-i18n="nav_projects">Projects</a></li>
+<li><a href="#live" data-config="liveProjects" data-i18n="nav_live">Live work</a></li>
+<li><a href="services.html" data-config="services" data-i18n="nav_services">Services</a></li>
+<li><a href="#hire-me" class="hot" data-i18n="nav_hire">Hire me</a></li>
 </ul>
 <div class="nav-ctl">
-<button class="ibtn" id="cmdkBtn" type="button" aria-label="Open command menu" title="Command menu"><svg aria-hidden="true"><use href="#i-search"/></svg><span class="lbl">Search</span><kbd id="cmdkKey">Ctrl</kbd><kbd>K</kbd></button>
+<button class="ibtn" id="cmdkBtn" type="button" aria-label="Open command menu" title="Command menu"><svg aria-hidden="true"><use href="#i-search"/></svg><span class="lbl" data-i18n="nav_search">Search</span><kbd id="cmdkKey">Ctrl</kbd><kbd>K</kbd></button>
 <button class="ibtn" id="langBtn" type="button" popovertarget="langMenu" aria-label="Language" title="Language">🌐</button>
 <div class="lang-menu" id="langMenu" popover role="menu" aria-label="Language">
 <button type="button" role="menuitemradio" data-lang="en" aria-checked="true">🇬🇧 English</button>
@@ -86,7 +88,7 @@
 <button type="button" role="menuitemradio" data-lang="es" aria-checked="false">🇪🇸 Español</button>
 </div>
 <button class="ibtn" id="themeBtn" type="button" aria-label="Toggle theme" title="Toggle theme"><span id="themeIcon">🌙</span></button>
-<a href="Sudish-Kumar-Resume-2026.pdf" download class="ibtn" title="Download resume">📄<span class="lbl">Resume</span></a>
+<a href="Sudish-Kumar-Resume-2026.pdf" download class="ibtn" title="Download resume">📄<span class="lbl" data-i18n="nav_resume">Resume</span></a>
 <button class="burger" id="burger" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu"><span></span></button>
 </div>
 </div>
@@ -98,7 +100,8 @@
 <canvas id="neural" aria-hidden="true"></canvas>
 <div class="hero-in">
 <div class="pill" id="pill" data-status="open"><span class="dot"></span><span data-i18n="hero_badge" id="pillText">Open to AI/ML Engineering Roles</span></div>
-<div class="hud" aria-label="Status"><span>📍 <b>Hyderabad, India</b></span><span>🕒 <b id="clock">--:--</b> IST</span><span>🗓 <b id="hudAvail">Available: Immediately for interviews</b></span></div>
+<div class="hud" aria-label="Status"><span>📍 <b>Hyderabad, India</b></span><span>🕒 <b id="clock">--:--</b> IST</span><span id="hudAvailWrap">🗓 <b><span data-i18n="hire_avail_l">Available:</span> <span id="hudAvail">Immediately for interviews</span></b></span></div>
+<p class="role-note" id="roleNote" hidden>🧩 Tailored for <b id="roleNoteLabel"></b> roles: skills and projects are ordered for this role, nothing is hidden. <a href="./">Standard view</a></p>
 <div class="hero-name">
 <div class="ring"><img src="profile.jpg" alt="Sudish Kumar" width="128" height="128" fetchpriority="high"></div>
 <h1>SUDISH <span class="grad">KUMAR</span></h1>
@@ -106,16 +109,16 @@
 <p class="typer" id="typer" data-roles='["ML Engineer","Deep Learning (PyTorch)","Generative AI","AWS SageMaker","Agentic AI &amp; RAG Systems"]'>ML Engineer | Deep Learning (PyTorch) | Generative AI | AWS SageMaker</p>
 <p class="hero-desc" data-i18n="hero_desc">I build AI systems that actually ship to production — not just notebooks that collect dust. Currently at Amazon deploying agentic AI and benchmarking LLMs. Two AWS certifications, 99%+ accuracy across 10+ initiatives, and tools that save my team 150+ hours daily. Looking for my next challenge.</p>
 <div class="stats">
-<div class="stat"><div class="n" data-count="10" data-suffix="+">10+</div><div class="l">Years Experience</div></div>
-<div class="stat"><div class="n" data-count="3" data-suffix="+">3+</div><div class="l">Years AI/ML @ Amazon</div></div>
-<div class="stat"><div class="n" data-count="99" data-suffix="%+">99%+</div><div class="l">Data Accuracy</div></div>
-<div class="stat"><div class="n" data-count="150" data-suffix="+">150+</div><div class="l">Hours Saved/Day</div></div>
-<div class="stat"><div class="n" data-count="2">2</div><div class="l">AWS Certifications</div></div>
+<div class="stat"><div class="n" data-count="10" data-suffix="+">10+</div><div class="l" data-i18n="stat_years">Years Experience</div></div>
+<div class="stat"><div class="n" data-count="3" data-suffix="+">3+</div><div class="l" data-i18n="stat_amazon">Years AI/ML @ Amazon</div></div>
+<div class="stat"><div class="n" data-count="99" data-suffix="%+">99%+</div><div class="l" data-i18n="stat_acc">Data Accuracy</div></div>
+<div class="stat"><div class="n" data-count="150" data-suffix="+">150+</div><div class="l" data-i18n="stat_hours">Hours Saved/Day</div></div>
+<div class="stat"><div class="n" data-count="2">2</div><div class="l" data-i18n="stat_certs">AWS Certifications</div></div>
 </div>
 <div class="cta">
-<a href="#hire-me" class="btn btn-hire">🔥 Hire Me at Your Company</a>
+<a href="#hire-me" class="btn btn-hire">🔥 <span data-i18n="hero_cta_hire">Hire Me at Your Company</span></a>
 <a href="https://wa.me/919870176701?text=Hi%20Sudish%2C%20saw%20your%20portfolio.%20Let's%20talk!" target="_blank" rel="noopener" class="btn btn-whatsapp"><svg fill="currentColor" aria-hidden="true"><use href="#i-wa"/></svg> WhatsApp</a>
-<a href="#projects" class="btn btn-ghost">View My Work ↓</a>
+<a href="#projects" class="btn btn-ghost" data-i18n="hero_cta_work">View My Work ↓</a>
 </div>
 </div>
 <div class="cue" aria-hidden="true"></div>
@@ -124,18 +127,18 @@
 <!-- By the Numbers -->
 <section id="numbers" class="tint">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Impact</p><h2 class="title">By the Numbers</h2></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="numbers_eyebrow">Impact</p><h2 class="title" data-i18n="numbers_title">By the Numbers</h2></div>
 <div class="bento">
-<div class="card num reveal d1"><div class="big" data-count="10" data-suffix="+">10+</div><div class="desc">Years Professional Experience</div></div>
-<div class="card num reveal d2"><div class="big" data-count="3" data-suffix="+">3+</div><div class="desc">Years in AI/ML at Amazon/AWS</div></div>
-<div class="card num reveal d3"><div class="big" data-count="10" data-suffix="+">10+</div><div class="desc">AI Initiatives Delivered</div></div>
-<div class="card num reveal d4"><div class="big" data-count="99" data-suffix="%+">99%+</div><div class="desc">Data Accuracy Maintained</div></div>
-<div class="card num reveal d5"><div class="big" data-count="200" data-suffix="+">200+</div><div class="desc">Associates Team Impact</div></div>
-<div class="card num reveal d1"><div class="big" data-count="45" data-suffix="min">45min</div><div class="desc">Saved Per Person Daily</div></div>
-<div class="card num reveal d2"><div class="big" data-count="500" data-suffix="+">500+</div><div class="desc">Students Taught Python & SQL</div></div>
-<div class="card num reveal d3"><div class="big" data-count="2">2</div><div class="desc">AWS Certifications (AI + GenAI)</div></div>
-<div class="card num reveal d4"><div class="big" data-count="12" data-suffix="+">12+</div><div class="desc">Projects Shipped</div></div>
-<div class="card num reveal d5"><div class="big">15-20%</div><div class="desc">Productivity Boost Delivered</div></div>
+<div class="card num reveal d1"><div class="big" data-count="10" data-suffix="+">10+</div><div class="desc" data-i18n="num_1">Years Professional Experience</div></div>
+<div class="card num reveal d2"><div class="big" data-count="3" data-suffix="+">3+</div><div class="desc" data-i18n="num_2">Years in AI/ML at Amazon/AWS</div></div>
+<div class="card num reveal d3"><div class="big" data-count="10" data-suffix="+">10+</div><div class="desc" data-i18n="num_3">AI Initiatives Delivered</div></div>
+<div class="card num reveal d4"><div class="big" data-count="99" data-suffix="%+">99%+</div><div class="desc" data-i18n="num_4">Data Accuracy Maintained</div></div>
+<div class="card num reveal d5"><div class="big" data-count="200" data-suffix="+">200+</div><div class="desc" data-i18n="num_5">Associates Team Impact</div></div>
+<div class="card num reveal d1"><div class="big" data-count="45" data-suffix="min">45min</div><div class="desc" data-i18n="num_6">Saved Per Person Daily</div></div>
+<div class="card num reveal d2"><div class="big" data-count="500" data-suffix="+">500+</div><div class="desc" data-i18n="num_7">Students Taught Python & SQL</div></div>
+<div class="card num reveal d3"><div class="big" data-count="2">2</div><div class="desc" data-i18n="num_8">AWS Certifications (AI + GenAI)</div></div>
+<div class="card num reveal d4"><div class="big" data-count="12" data-suffix="+">12+</div><div class="desc" data-i18n="num_9">Projects Shipped</div></div>
+<div class="card num reveal d5"><div class="big">15-20%</div><div class="desc" data-i18n="num_10">Productivity Boost Delivered</div></div>
 </div>
 </div>
 </section>
@@ -143,30 +146,30 @@
 <!-- Skills -->
 <section id="skills">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Technical Arsenal</p><h2 class="title">What I Work With</h2></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="skills_eyebrow">Technical Arsenal</p><h2 class="title" data-i18n="skills_title">What I Work With</h2></div>
 <div class="grid-3">
-<div class="card skill reveal d1"><div class="ico">🧠</div><h3>Machine Learning & Deep Learning</h3>
+<div class="card skill reveal d1" data-skill="ml"><div class="ico">🧠</div><h3>Machine Learning & Deep Learning</h3>
 <div class="tags"><span class="tag">PyTorch</span><span class="tag">TensorFlow</span><span class="tag">Scikit-Learn</span><span class="tag">XGBoost</span><span class="tag">LightGBM</span><span class="tag">Random Forest</span><span class="tag">CNNs/RNNs</span><span class="tag">Feature Engineering</span><span class="tag">Hyperparameter Tuning</span><span class="tag">Model Optimization</span><span class="tag">Transfer Learning</span></div></div>
 
-<div class="card skill reveal d2"><div class="ico">🤖</div><h3>Generative AI & Agentic Systems</h3>
+<div class="card skill reveal d2" data-skill="genai"><div class="ico">🤖</div><h3>Generative AI & Agentic Systems</h3>
 <div class="tags"><span class="tag">LLM Fine-tuning (LoRA/QLoRA)</span><span class="tag">RAG Pipelines</span><span class="tag">LangChain</span><span class="tag">LangGraph</span><span class="tag">CrewAI</span><span class="tag">Hugging Face</span><span class="tag">Prompt Engineering</span><span class="tag">Agentic AI</span><span class="tag">MCP (Model Context Protocol)</span><span class="tag">Guardrails</span><span class="tag">AI Safety</span><span class="tag">Red-Teaming</span><span class="tag">LLM Evaluation</span><span class="tag">Vector Databases (FAISS/Pinecone)</span></div></div>
 
-<div class="card skill reveal d3"><div class="ico">☁️</div><h3>AWS & MLOps (Production)</h3>
+<div class="card skill reveal d3" data-skill="aws"><div class="ico">☁️</div><h3>AWS & MLOps (Production)</h3>
 <div class="tags"><span class="tag">AWS SageMaker</span><span class="tag">AWS Bedrock</span><span class="tag">Lambda/EC2/S3</span><span class="tag">Step Functions</span><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">MLflow</span><span class="tag">Weights & Biases</span><span class="tag">CI/CD for ML</span><span class="tag">Model Monitoring</span><span class="tag">A/B Testing</span><span class="tag">TorchServe/Triton</span><span class="tag">Prometheus/Grafana</span></div></div>
 
-<div class="card skill reveal d4"><div class="ico">🐍</div><h3>Python (Production-Grade)</h3>
+<div class="card skill reveal d4" data-skill="python"><div class="ico">🐍</div><h3>Python (Production-Grade)</h3>
 <div class="tags"><span class="tag">NumPy</span><span class="tag">Pandas</span><span class="tag">FastAPI</span><span class="tag">Pytest</span><span class="tag">OOP Patterns</span><span class="tag">Type Hints</span><span class="tag">Async/Await</span><span class="tag">Data Pipelines</span><span class="tag">Matplotlib/Plotly</span><span class="tag">Streamlit/Gradio</span></div></div>
 
-<div class="card skill reveal d5"><div class="ico">🗄️</div><h3>SQL & Data Engineering</h3>
+<div class="card skill reveal d5" data-skill="sql"><div class="ico">🗄️</div><h3>SQL & Data Engineering</h3>
 <div class="tags"><span class="tag">PostgreSQL</span><span class="tag">Window Functions</span><span class="tag">CTEs</span><span class="tag">Query Optimization</span><span class="tag">ETL Pipelines</span><span class="tag">Apache Airflow</span><span class="tag">Apache Spark</span><span class="tag">dbt</span><span class="tag">Kafka</span><span class="tag">Data Warehousing</span><span class="tag">Snowflake</span></div></div>
 
-<div class="card skill reveal d1"><div class="ico">📊</div><h3>Analytics & Visualization</h3>
+<div class="card skill reveal d1" data-skill="analytics"><div class="ico">📊</div><h3>Analytics & Visualization</h3>
 <div class="tags"><span class="tag">Tableau</span><span class="tag">Power BI</span><span class="tag">Excel (Advanced)</span><span class="tag">Probability & Statistics</span><span class="tag">Weights & Biases</span><span class="tag">Jupyter</span><span class="tag">A/B Testing</span></div></div>
 
-<div class="card skill reveal d2"><div class="ico">🛠️</div><h3>Tools & Production Infrastructure</h3>
+<div class="card skill reveal d2" data-skill="tools"><div class="ico">🛠️</div><h3>Tools & Production Infrastructure</h3>
 <div class="tags"><span class="tag">Git/GitHub</span><span class="tag">Linux</span><span class="tag">Docker</span><span class="tag">Kubernetes</span><span class="tag">REST APIs</span><span class="tag">Microservices</span><span class="tag">CI/CD</span><span class="tag">Agile/Scrum</span><span class="tag">Ray Serve</span></div></div>
 
-<div class="card skill reveal d3"><div class="ico">🌐</div><h3>Web Development (Side)</h3>
+<div class="card skill reveal d3" data-skill="web"><div class="ico">🌐</div><h3>Web Development (Side)</h3>
 <div class="tags"><span class="tag">HTML/CSS/JS</span><span class="tag">TypeScript</span><span class="tag">Node.js</span><span class="tag">Responsive Design</span><span class="tag">SEO</span><span class="tag">UI/UX</span></div></div>
 </div>
 </div>
@@ -175,7 +178,7 @@
 <!-- Experience -->
 <section id="experience" class="tint">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Where I've Worked</p><h2 class="title">Work Experience</h2></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="exp_eyebrow">Where I've Worked</p><h2 class="title" data-i18n="exp_title">Work Experience</h2></div>
 <div class="timeline">
 <div class="tl-track" aria-hidden="true"><div class="tl-fill"></div></div>
 <article class="card tl-item now reveal">
@@ -219,8 +222,8 @@
 <!-- Projects -->
 <section id="projects">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Featured Work</p><h2 class="title">Projects</h2>
-<p class="lede">From model training to production APIs — here's what I've shipped</p></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="proj_eyebrow">Featured Work</p><h2 class="title" data-i18n="proj_title">Projects</h2>
+<p class="lede" data-i18n="proj_lede">From model training to production APIs — here's what I've shipped</p></div>
 <div class="chips reveal" role="group" aria-label="Filter projects">
 <button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>
 <button class="chip" type="button" data-filter="genai" aria-pressed="false">GenAI</button>
@@ -334,8 +337,8 @@
 <!-- Why Hire Me -->
 <section id="why-hire">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">The Pitch</p><h2 class="title">Why Hire Me?</h2>
-<p class="lede">What I bring to your team that most candidates don't.</p></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="why_eyebrow">The Pitch</p><h2 class="title" data-i18n="why_title">Why Hire Me?</h2>
+<p class="lede" data-i18n="why_lede">What I bring to your team that most candidates don't.</p></div>
 <div class="grid-3">
 <div class="card why reveal d1"><div class="ico">🚀</div><h3>I Ship, Not Just Experiment</h3><p>Most ML engineers stop at the notebook. I take models from research to production — with monitoring, testing, and real users.</p></div>
 <div class="card why reveal d2"><div class="ico">🎯</div><h3>99%+ Accuracy, Every Time</h3><p>10+ AI initiatives, near-perfect data quality. Your model is only as good as your data. I don't cut corners.</p></div>
@@ -344,7 +347,7 @@
 <div class="card why reveal d5"><div class="ico">🧩</div><h3>Full ML Lifecycle</h3><p>Data engineering → training → deployment → monitoring. No hand-offs needed. I own the entire pipeline end to end.</p></div>
 <div class="card why reveal d1"><div class="ico">📝</div><h3>Clear Communicator</h3><p>7 years explaining physics to students. SOPs that 200 people follow. I can explain your model to the CEO and the intern.</p></div>
 </div>
-<div class="center reveal"><a href="#hire-me" class="btn btn-hire">🔥 Hire Me at Your Company</a></div>
+<div class="center reveal"><a href="#hire-me" class="btn btn-hire">🔥 <span data-i18n="hero_cta_hire">Hire Me at Your Company</span></a></div>
 </div>
 </section>
 
@@ -363,23 +366,23 @@
 <div class="hire-layout">
 <img src="badge.png" alt="Sudish Kumar Badge" class="badge reveal" width="210" height="210" loading="lazy">
 <div class="hire-text reveal">
-<h2>🔥 Want Me on Your Team?</h2>
-<p class="sub">I'm actively looking for my next ML/AI engineering challenge. If your team builds intelligent systems, ships models to production, or needs someone who combines technical depth with clear communication — let's talk.</p>
+<h2>🔥 <span data-i18n="hire_title">Want Me on Your Team?</span></h2>
+<p class="sub" data-i18n="hire_sub">I'm actively looking for my next ML/AI engineering challenge. If your team builds intelligent systems, ships models to production, or needs someone who combines technical depth with clear communication — let's talk.</p>
 <div class="details">
-<span><em class="hd">▸</em> Roles: <span id="avRoles">ML Engineer, GenAI Engineer, Data Scientist, NLP Engineer, MLOps, AI Solutions Architect</span></span>
-<span><em class="hd">▸</em> Location: <span id="avLocation">Anywhere (preferred: Bengaluru / Hyderabad / Pune / Gurgaon)</span></span>
-<span><em class="hd">▸</em> Notice Period: <span id="avNotice">30 Days / Negotiable</span></span>
-<span><em class="hd">▸</em> Available: <span id="avAvailable">Immediately for interviews</span></span>
+<span><em class="hd">▸</em> <span data-i18n="hire_roles_l">Roles:</span> <span id="avRoles">ML Engineer, GenAI Engineer, Data Scientist, NLP Engineer, MLOps, AI Solutions Architect</span></span>
+<span><em class="hd">▸</em> <span data-i18n="hire_loc_l">Location:</span> <span id="avLocation">Anywhere (preferred: Bengaluru / Hyderabad / Pune / Gurgaon)</span></span>
+<span><em class="hd">▸</em> <span data-i18n="hire_notice_l">Notice Period:</span> <span id="avNotice">30 Days / Negotiable</span></span>
+<span><em class="hd">▸</em> <span data-i18n="hire_avail_l">Available:</span> <span id="avAvailable">Immediately for interviews</span></span>
 </div>
 <div class="hire-btns">
-<a href="https://wa.me/919870176701?text=Hi%20Sudish%2C%20I%20have%20a%20role%20I'd%20like%20to%20discuss%20at%20my%20company.%20Let's%20connect!" target="_blank" rel="noopener" class="btn btn-whatsapp"><svg fill="currentColor" aria-hidden="true"><use href="#i-wa"/></svg> WhatsApp Me Now</a>
-<a href="mailto:sudishnit@gmail.com?subject=Opportunity%20at%20[Your%20Company]&body=Hi%20Sudish%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20I%20think%20you%27d%20be%20a%20great%20fit%20for%20a%20role%20at%20our%20company.%0A%0ACompany%3A%20%0ARole%3A%20%0ALocation%3A%20%0ACTC%20Range%3A%20%0A%0ALet%27s%20schedule%20a%20call!" class="btn btn-gmail"><svg fill="currentColor" aria-hidden="true"><use href="#i-gmail"/></svg> Email Me a Role</a>
+<a href="https://wa.me/919870176701?text=Hi%20Sudish%2C%20I%20have%20a%20role%20I'd%20like%20to%20discuss%20at%20my%20company.%20Let's%20connect!" target="_blank" rel="noopener" class="btn btn-whatsapp"><svg fill="currentColor" aria-hidden="true"><use href="#i-wa"/></svg> <span data-i18n="hire_wa">WhatsApp Me Now</span></a>
+<a href="mailto:sudishnit@gmail.com?subject=Opportunity%20at%20[Your%20Company]&body=Hi%20Sudish%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20I%20think%20you%27d%20be%20a%20great%20fit%20for%20a%20role%20at%20our%20company.%0A%0ACompany%3A%20%0ARole%3A%20%0ALocation%3A%20%0ACTC%20Range%3A%20%0A%0ALet%27s%20schedule%20a%20call!" class="btn btn-gmail"><svg fill="currentColor" aria-hidden="true"><use href="#i-gmail"/></svg> <span data-i18n="hire_email">Email Me a Role</span></a>
 <a href="https://linkedin.com/in/simplysudish" target="_blank" rel="noopener" class="btn btn-linkedin"><svg fill="currentColor" aria-hidden="true"><use href="#i-in"/></svg> LinkedIn</a>
 <a href="#" id="bookCall" class="btn btn-book" target="_blank" rel="noopener" hidden>📅 <span>Book a 20-min intro call</span></a>
 </div>
 <div class="fit-cta" id="fitCta" data-config="fitCheck" hidden>
 <button type="button" class="btn btn-ghost" id="fitBtn">🧭 <span id="fitLabel">Check my fit for your JD</span></button>
-<span class="fit-hint">Paste a job description, get an honest match report in ~20 s.</span>
+<span class="fit-hint" data-i18n="fit_hint">Paste a job description, get an honest match report in ~20 s.</span>
 </div>
 </div>
 </div>
@@ -389,7 +392,7 @@
 <!-- Certifications -->
 <section id="certifications" data-config="certifications">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Credentials</p><h2 class="title">Certifications</h2></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="cert_eyebrow">Credentials</p><h2 class="title" data-i18n="cert_title">Certifications</h2></div>
 <!-- rendered from config → certifications (cards become verification links when a verifyUrl is set) -->
 <div class="grid-3" id="certGrid"></div>
 </div>
@@ -398,7 +401,7 @@
 <!-- Awards -->
 <section id="awards" class="tint">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Recognition</p><h2 class="title">Awards</h2></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="awards_eyebrow">Recognition</p><h2 class="title" data-i18n="awards_title">Awards</h2></div>
 <div class="awards">
 <div class="card award reveal d1"><div class="ico">🏆</div><div><h3>Prime Player Award — Feb & Apr 2025</h3><p>Highest productivity and reliability across the entire team. Twice in 3 months.</p></div></div>
 <div class="card award reveal d2"><div class="ico">⭐</div><div><h3>Leadership Recognition</h3><p>Multiple shout-outs for Agentic AI SOP development, multilingual dataset creation, and going above and beyond.</p></div></div>
@@ -409,30 +412,30 @@
 <!-- Contact -->
 <section id="contact">
 <div class="container">
-<div class="head reveal"><p class="eyebrow">Let's Connect</p><h2 class="title">Get In Touch</h2>
-<p class="lede">Looking for AI/ML roles, data science positions, or freelance consulting. Pick your preferred way.</p></div>
+<div class="head reveal"><p class="eyebrow" data-i18n="contact_eyebrow">Let's Connect</p><h2 class="title" data-i18n="contact_title">Get In Touch</h2>
+<p class="lede" data-i18n="contact_lede">Looking for AI/ML roles, data science positions, or freelance consulting. Pick your preferred way.</p></div>
 <div class="contacts reveal">
-<a href="https://wa.me/919870176701?text=Hi%20Sudish!" target="_blank" rel="noopener" class="card clink" style="border-color:#25d366"><svg fill="#25d366" aria-hidden="true"><use href="#i-wa"/></svg><div><small>WhatsApp</small>Chat directly</div></a>
-<div class="card clink"><a href="mailto:sudishnit@gmail.com" class="clink-a"><svg aria-hidden="true"><use href="#i-mail"/></svg><div><small>Email</small>sudishnit@gmail.com</div></a><button type="button" class="cp" id="copyEmail" data-copy="sudishnit@gmail.com" aria-label="Copy email address">copy</button></div>
+<a href="https://wa.me/919870176701?text=Hi%20Sudish!" target="_blank" rel="noopener" class="card clink" style="border-color:#25d366"><svg fill="#25d366" aria-hidden="true"><use href="#i-wa"/></svg><div><small>WhatsApp</small><span data-i18n="c_wa_sub">Chat directly</span></div></a>
+<div class="card clink"><a href="mailto:sudishnit@gmail.com" class="clink-a"><svg aria-hidden="true"><use href="#i-mail"/></svg><div><small data-i18n="c_email_l">Email</small>sudishnit@gmail.com</div></a><button type="button" class="cp" id="copyEmail" data-copy="sudishnit@gmail.com" aria-label="Copy email address" data-i18n="c_copy">copy</button></div>
 <a href="https://linkedin.com/in/simplysudish" target="_blank" rel="noopener" class="card clink"><svg fill="currentColor" aria-hidden="true"><use href="#i-in"/></svg><div><small>LinkedIn</small>linkedin.com/in/simplysudish</div></a>
 <a href="https://github.com/Sudish007" target="_blank" rel="noopener" class="card clink"><svg fill="currentColor" aria-hidden="true"><use href="#i-gh"/></svg><div><small>GitHub</small>github.com/Sudish007</div></a>
-<a href="mailto:sudishnit@gmail.com?subject=Freelance%20Project&body=Project%20Type%3A%0ABudget%3A%0ATimeline%3A%0ADescription%3A" class="card clink"><svg aria-hidden="true"><use href="#i-case"/></svg><div><small>Freelance</small>Hire for AI/ML projects</div></a>
-<a href="Sudish-Kumar-Resume-2026.pdf" target="_blank" class="card clink"><svg aria-hidden="true"><use href="#i-doc"/></svg><div><small>Resume</small>Download my resume (PDF)</div></a>
-<a href="#" target="_blank" rel="noopener" class="card clink" id="bookCard" hidden><span class="clink-emoji" aria-hidden="true">📅</span><div><small>Book a call</small><span id="bookCardText">Pick a 20-min slot that suits you</span></div></a>
-<button type="button" class="card clink" id="shareBtn" hidden><svg aria-hidden="true"><use href="#i-share"/></svg><div><small>Share</small>Send this page to a recruiter</div></button>
+<a href="mailto:sudishnit@gmail.com?subject=Freelance%20Project&body=Project%20Type%3A%0ABudget%3A%0ATimeline%3A%0ADescription%3A" class="card clink"><svg aria-hidden="true"><use href="#i-case"/></svg><div><small data-i18n="c_free_l">Freelance</small><span data-i18n="c_free_sub">Hire for AI/ML projects</span></div></a>
+<a href="Sudish-Kumar-Resume-2026.pdf" target="_blank" class="card clink"><svg aria-hidden="true"><use href="#i-doc"/></svg><div><small data-i18n="nav_resume">Resume</small><span data-i18n="c_resume_sub">Download my resume (PDF)</span></div></a>
+<a href="#" target="_blank" rel="noopener" class="card clink" id="bookCard" hidden><span class="clink-emoji" aria-hidden="true">📅</span><div><small data-i18n="c_book_l">Book a call</small><span id="bookCardText">Pick a 20-min slot that suits you</span></div></a>
+<button type="button" class="card clink" id="shareBtn" hidden><svg aria-hidden="true"><use href="#i-share"/></svg><div><small data-i18n="c_share_l">Share</small><span data-i18n="c_share_sub">Send this page to a recruiter</span></div></button>
 </div>
 <form class="card cform reveal" id="msgForm" novalidate>
-<h3>📮 Or send it right here</h3>
-<p class="cform-sub">Delivered straight to my inbox and phone — no email app needed. Powered by this site's own API.</p>
+<h3>📮 <span data-i18n="form_title">Or send it right here</span></h3>
+<p class="cform-sub" data-i18n="form_sub">Delivered straight to my inbox and phone — no email app needed. Powered by this site's own API.</p>
 <div class="cform-row">
-<label>Your name<input type="text" id="mfName" name="name" required maxlength="100" autocomplete="name" placeholder="Priya Sharma"></label>
-<label>Email / phone / LinkedIn<input type="text" id="mfContact" name="contact" required maxlength="200" autocomplete="email" placeholder="priya@company.com"></label>
+<label><span data-i18n="form_name">Your name</span><input type="text" id="mfName" name="name" required maxlength="100" autocomplete="name" placeholder="Priya Sharma"></label>
+<label><span data-i18n="form_contact">Email / phone / LinkedIn</span><input type="text" id="mfContact" name="contact" required maxlength="200" autocomplete="email" placeholder="priya@company.com"></label>
 </div>
-<label>Message<textarea id="mfBody" name="message" required minlength="10" maxlength="4000" rows="4" placeholder="Role, company, and what caught your eye…"></textarea></label>
+<label><span data-i18n="form_msg">Message</span><textarea id="mfBody" name="message" required minlength="10" maxlength="4000" rows="4" placeholder="Role, company, and what caught your eye…" data-i18n-ph="form_msg_ph"></textarea></label>
 <input type="text" id="mfHp" name="website" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
 <div class="cform-foot">
 <span class="cform-note" id="mfDone" hidden>✓ Delivered. I usually reply within a day.</span>
-<button class="btn btn-primary" id="msgSend" type="submit">Send message →</button>
+<button class="btn btn-primary" id="msgSend" type="submit" data-i18n="form_send">Send message →</button>
 </div>
 </form>
 <div class="card freelance reveal">
@@ -458,8 +461,8 @@
 </main>
 
 <footer><div class="container">
-<p>&copy; 2026 Sudish Kumar. Yes, I built this too. <a href="#hire-me">Hire me</a>.</p>
-<p class="meta"><a href="services.html" data-config="services">Services & pricing</a> · <a href="legal.html#terms">Terms</a> · <a href="legal.html#privacy">Privacy</a> · <a href="legal.html#refunds">Refunds</a> · Press <kbd>Ctrl</kbd> <kbd>K</kbd> to search<span id="updated"></span></p>
+<p>&copy; 2026 Sudish Kumar. <span data-i18n="footer_built">Yes, I built this too.</span> <a href="#hire-me" data-i18n="nav_hire">Hire me</a>.</p>
+<p class="meta"><a href="services.html" data-config="services" data-i18n="footer_services">Services & pricing</a> · <a href="legal.html#terms" data-i18n="footer_terms">Terms</a> · <a href="legal.html#privacy" data-i18n="footer_privacy">Privacy</a> · <a href="legal.html#refunds" data-i18n="footer_refunds">Refunds</a> · Press <kbd>Ctrl</kbd> <kbd>K</kbd> to search<span id="updated"></span></p>
 </div></footer>
 
 <!-- Command palette -->
@@ -487,6 +490,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/config.js"></script>
+<script src="assets/i18n.js" defer></script>
 <script src="assets/main.js" defer></script>
 </body>
 </html>
