@@ -80,11 +80,11 @@ globalThis.SK_CONFIG = {
         icon: '🎓',
         color: '#f59e0b',
         type: 'android+web',
-        status: 'Play Store listing in progress',
+        status: 'Live on Google Play',
         tagline: 'Learn Bhojpuri from Hindi & English — dialogues, grammar, quizzes. Fully offline, no ads, no tracking. v1.1.0.',
         tags: ['React Native', 'Expo', 'TypeScript', 'Offline-first'],
         website: 'https://sudish007.github.io/bhojverse-site/',
-        playStore: '',                                  // paste https://play.google.com/store/apps/details?id=com.bhojverse.app when live
+        playStore: 'https://play.google.com/store/apps/details?id=com.bhojverse.app',
         apk: '',
         repo: 'https://github.com/Sudish007/bhojverse-site'
       },
@@ -93,11 +93,11 @@ globalThis.SK_CONFIG = {
         icon: '🗣️',
         color: '#06b6d4',
         type: 'android',
-        status: 'Play Store listing in progress',
+        status: 'Live on Google Play',
         tagline: 'Learn Telugu from Hindi/English — speaking practice, stories, office Telugu. Free, no ads. v3.2.1.',
         tags: ['Kotlin', 'Android', 'Native'],
         website: 'https://sudish007.github.io/telusa-privacy/',
-        playStore: '',                                  // https://play.google.com/store/apps/details?id=com.telusa.app when live
+        playStore: 'https://play.google.com/store/apps/details?id=com.telusa.app',
         apk: '',
         repo: 'https://github.com/Sudish007/telusa-privacy'
       },
